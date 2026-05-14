@@ -13,7 +13,7 @@
     <RuntimeIdentifiers>win-x64;win-x86;linux-x64;linux-x86</RuntimeIdentifiers>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetPlatformIdentifier)' == 'windows'">
+  <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
     <DefineConstants>$(DefineConstants);WINDOWS</DefineConstants>
   </PropertyGroup>
 
