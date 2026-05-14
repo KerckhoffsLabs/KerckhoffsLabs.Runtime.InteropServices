@@ -98,42 +98,42 @@ public readonly struct NativeCULong
     // int.CreateChecked(nativeCULong) work via INumberBase&lt;T&gt;.
 
     /// <summary>Converts an <see cref="int"/> to a <see cref="NativeCULong"/>. Negative values wrap silently; the paired <c>checked</c> operator throws.</summary>
-    public static explicit operator NativeCULong(int   value) => FromNative(unchecked((NativeType)value));
+    public static explicit operator NativeCULong(int value) => FromNative(unchecked((NativeType)value));
     /// <summary>Converts a <see cref="uint"/> to a <see cref="NativeCULong"/>. Always exact; widens to <see cref="nuint"/> storage on Unix.</summary>
-    public static explicit operator NativeCULong(uint  value) => FromNative((NativeType)value);
+    public static explicit operator NativeCULong(uint value) => FromNative((NativeType)value);
     /// <summary>Converts a <see cref="long"/> to a <see cref="NativeCULong"/>. Out-of-range values wrap silently; the paired <c>checked</c> operator throws.</summary>
-    public static explicit operator NativeCULong(long  value) => FromNative(unchecked((NativeType)value));
+    public static explicit operator NativeCULong(long value) => FromNative(unchecked((NativeType)value));
     /// <summary>Converts a <see cref="ulong"/> to a <see cref="NativeCULong"/>. On Windows (32-bit storage), values above <see cref="uint.MaxValue"/> wrap silently; the paired <c>checked</c> operator throws. On Unix (64-bit storage), always exact.</summary>
     public static explicit operator NativeCULong(ulong value) => FromNative(unchecked((NativeType)value));
     /// <summary>Converts an <see cref="nuint"/> to a <see cref="NativeCULong"/>. On Windows (32-bit storage), values above <see cref="uint.MaxValue"/> wrap silently. On Unix (64-bit storage), always exact.</summary>
     public static explicit operator NativeCULong(nuint value) => FromNative(unchecked((NativeType)value));
 
     /// <summary>Converts an <see cref="int"/> to a <see cref="NativeCULong"/>. Throws <see cref="System.OverflowException"/> on negative values.</summary>
-    public static explicit operator checked NativeCULong(int   value) => new(checked((uint)value));
+    public static explicit operator checked NativeCULong(int value) => new(checked((uint)value));
     /// <summary>Converts a <see cref="long"/> to a <see cref="NativeCULong"/>. Throws <see cref="System.OverflowException"/> on out-of-range values.</summary>
-    public static explicit operator checked NativeCULong(long  value) => new(checked((nuint)value));
+    public static explicit operator checked NativeCULong(long value) => new(checked((nuint)value));
     /// <summary>Converts a <see cref="ulong"/> to a <see cref="NativeCULong"/>. On Windows (32-bit storage), throws <see cref="System.OverflowException"/> on values above <see cref="uint.MaxValue"/>. On Unix (64-bit storage), always succeeds.</summary>
     public static explicit operator checked NativeCULong(ulong value) => new(checked((nuint)value));
 
     /// <summary>Converts a <see cref="NativeCULong"/> to an <see cref="int"/>. Values above <see cref="int.MaxValue"/> wrap to negative silently; the paired <c>checked</c> operator throws.</summary>
-    public static explicit operator int   (NativeCULong value) => unchecked((int)value._value);
+    public static explicit operator int(NativeCULong value) => unchecked((int)value._value);
     /// <summary>Converts a <see cref="NativeCULong"/> to a <see cref="uint"/>. On Unix (64-bit storage), values above <see cref="uint.MaxValue"/> truncate silently; the paired <c>checked</c> operator throws. On Windows (32-bit storage), always exact.</summary>
-    public static explicit operator uint  (NativeCULong value) => unchecked((uint)value._value);
+    public static explicit operator uint(NativeCULong value) => unchecked((uint)value._value);
     /// <summary>Converts a <see cref="NativeCULong"/> to a <see cref="long"/>. On Unix (64-bit storage), values above <see cref="long.MaxValue"/> wrap to negative silently; the paired <c>checked</c> operator throws. On Windows (32-bit storage), always exact.</summary>
-    public static explicit operator long  (NativeCULong value) => unchecked((long)value._value);
+    public static explicit operator long(NativeCULong value) => unchecked((long)value._value);
     /// <summary>Converts a <see cref="NativeCULong"/> to a <see cref="ulong"/>. Always exact.</summary>
-    public static explicit operator ulong (NativeCULong value) => unchecked((ulong)value._value);
+    public static explicit operator ulong(NativeCULong value) => unchecked((ulong)value._value);
     /// <summary>Converts a <see cref="NativeCULong"/> to an <see cref="nuint"/>. Always exact.</summary>
-    public static explicit operator nuint (NativeCULong value) => value._value;
+    public static explicit operator nuint(NativeCULong value) => value._value;
 
     /// <summary>Converts a <see cref="NativeCULong"/> to an <see cref="int"/>. Throws <see cref="System.OverflowException"/> on values above <see cref="int.MaxValue"/>.</summary>
-    public static explicit operator checked int   (NativeCULong value) => checked((int)value._value);
+    public static explicit operator checked int(NativeCULong value) => checked((int)value._value);
     /// <summary>Converts a <see cref="NativeCULong"/> to a <see cref="uint"/>. On Unix (64-bit storage), throws <see cref="System.OverflowException"/> on values above <see cref="uint.MaxValue"/>. On Windows (32-bit storage), always succeeds.</summary>
-    public static explicit operator checked uint  (NativeCULong value) => checked((uint)value._value);
+    public static explicit operator checked uint(NativeCULong value) => checked((uint)value._value);
     /// <summary>Converts a <see cref="NativeCULong"/> to a <see cref="long"/>. On Unix (64-bit storage), throws <see cref="System.OverflowException"/> on values above <see cref="long.MaxValue"/>. On Windows (32-bit storage), always succeeds.</summary>
-    public static explicit operator checked long  (NativeCULong value) => checked((long)value._value);
+    public static explicit operator checked long(NativeCULong value) => checked((long)value._value);
     /// <summary>Converts a <see cref="NativeCULong"/> to a <see cref="ulong"/>. Always succeeds (the conversion is exact on every supported platform).</summary>
-    public static explicit operator checked ulong (NativeCULong value) => checked((ulong)value._value);
+    public static explicit operator checked ulong(NativeCULong value) => checked((ulong)value._value);
 
     /// <summary>
     /// Returns a value indicating whether this instance is equal to a specified object.
@@ -752,12 +752,12 @@ public readonly struct NativeCULong
     {
         ulong v = (ulong)value._value;
 
-        if (typeof(TOther) == typeof(sbyte))  { sbyte  r = checked((sbyte)v);  result = (TOther)(object)r; return true; }
-        if (typeof(TOther) == typeof(short))  { short  r = checked((short)v);  result = (TOther)(object)r; return true; }
-        if (typeof(TOther) == typeof(int))    { int    r = checked((int)v);    result = (TOther)(object)r; return true; }
-        if (typeof(TOther) == typeof(long))   { long   r = checked((long)v);   result = (TOther)(object)r; return true; }
-        if (typeof(TOther) == typeof(nint))   { nint   r = checked((nint)v);   result = (TOther)(object)r; return true; }
-        if (typeof(TOther) == typeof(Int128)) { Int128 r = v;                  result = (TOther)(object)r; return true; }
+        if (typeof(TOther) == typeof(sbyte)) { sbyte r = checked((sbyte)v); result = (TOther)(object)r; return true; }
+        if (typeof(TOther) == typeof(short)) { short r = checked((short)v); result = (TOther)(object)r; return true; }
+        if (typeof(TOther) == typeof(int)) { int r = checked((int)v); result = (TOther)(object)r; return true; }
+        if (typeof(TOther) == typeof(long)) { long r = checked((long)v); result = (TOther)(object)r; return true; }
+        if (typeof(TOther) == typeof(nint)) { nint r = checked((nint)v); result = (TOther)(object)r; return true; }
+        if (typeof(TOther) == typeof(Int128)) { Int128 r = v; result = (TOther)(object)r; return true; }
 
         return TOther.TryConvertFromChecked(v, out result);
     }
@@ -769,12 +769,12 @@ public readonly struct NativeCULong
         ulong v = (ulong)value._value;
 
         // Ulong is non-negative, so only the upper bound can saturate.
-        if (typeof(TOther) == typeof(sbyte))  { sbyte  r = v > (ulong)sbyte.MaxValue ? sbyte.MaxValue : (sbyte)v; result = (TOther)(object)r; return true; }
-        if (typeof(TOther) == typeof(short))  { short  r = v > (ulong)short.MaxValue ? short.MaxValue : (short)v; result = (TOther)(object)r; return true; }
-        if (typeof(TOther) == typeof(int))    { int    r = v > int.MaxValue           ? int.MaxValue   : (int)v;   result = (TOther)(object)r; return true; }
-        if (typeof(TOther) == typeof(long))   { long   r = v > long.MaxValue          ? long.MaxValue  : (long)v;  result = (TOther)(object)r; return true; }
-        if (typeof(TOther) == typeof(nint))   { nint   r = v > (ulong)nint.MaxValue   ? nint.MaxValue  : (nint)v;  result = (TOther)(object)r; return true; }
-        if (typeof(TOther) == typeof(Int128)) { Int128 r = v;                                                     result = (TOther)(object)r; return true; }
+        if (typeof(TOther) == typeof(sbyte)) { sbyte r = v > (ulong)sbyte.MaxValue ? sbyte.MaxValue : (sbyte)v; result = (TOther)(object)r; return true; }
+        if (typeof(TOther) == typeof(short)) { short r = v > (ulong)short.MaxValue ? short.MaxValue : (short)v; result = (TOther)(object)r; return true; }
+        if (typeof(TOther) == typeof(int)) { int r = v > int.MaxValue ? int.MaxValue : (int)v; result = (TOther)(object)r; return true; }
+        if (typeof(TOther) == typeof(long)) { long r = v > long.MaxValue ? long.MaxValue : (long)v; result = (TOther)(object)r; return true; }
+        if (typeof(TOther) == typeof(nint)) { nint r = v > (ulong)nint.MaxValue ? nint.MaxValue : (nint)v; result = (TOther)(object)r; return true; }
+        if (typeof(TOther) == typeof(Int128)) { Int128 r = v; result = (TOther)(object)r; return true; }
 
         return TOther.TryConvertFromSaturating(v, out result);
     }
@@ -785,12 +785,12 @@ public readonly struct NativeCULong
     {
         ulong v = (ulong)value._value;
 
-        if (typeof(TOther) == typeof(sbyte))  { sbyte  r = unchecked((sbyte)v);  result = (TOther)(object)r; return true; }
-        if (typeof(TOther) == typeof(short))  { short  r = unchecked((short)v);  result = (TOther)(object)r; return true; }
-        if (typeof(TOther) == typeof(int))    { int    r = unchecked((int)v);    result = (TOther)(object)r; return true; }
-        if (typeof(TOther) == typeof(long))   { long   r = unchecked((long)v);   result = (TOther)(object)r; return true; }
-        if (typeof(TOther) == typeof(nint))   { nint   r = unchecked((nint)v);   result = (TOther)(object)r; return true; }
-        if (typeof(TOther) == typeof(Int128)) { Int128 r = v;                    result = (TOther)(object)r; return true; }
+        if (typeof(TOther) == typeof(sbyte)) { sbyte r = unchecked((sbyte)v); result = (TOther)(object)r; return true; }
+        if (typeof(TOther) == typeof(short)) { short r = unchecked((short)v); result = (TOther)(object)r; return true; }
+        if (typeof(TOther) == typeof(int)) { int r = unchecked((int)v); result = (TOther)(object)r; return true; }
+        if (typeof(TOther) == typeof(long)) { long r = unchecked((long)v); result = (TOther)(object)r; return true; }
+        if (typeof(TOther) == typeof(nint)) { nint r = unchecked((nint)v); result = (TOther)(object)r; return true; }
+        if (typeof(TOther) == typeof(Int128)) { Int128 r = v; result = (TOther)(object)r; return true; }
 
         return TOther.TryConvertFromTruncating(v, out result);
     }

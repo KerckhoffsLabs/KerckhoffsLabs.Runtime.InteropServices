@@ -14,7 +14,7 @@
 
   <PropertyGroup>
     <PackageId>KerckhoffsLabs.Runtime.InteropServices</PackageId>
-    <Version>0.1.0</Version>
+    <Version>0.0.0</Version>
     <Authors>KerckhoffsLabs and contributors</Authors>
     <Description>Provides support for platform-native interop types used at the managed/unmanaged boundary.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

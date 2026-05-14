@@ -1088,7 +1088,7 @@ public partial class NativeCULongTests
     public void op_UnaryNegationTest()
     {
         Assert.Equal(new NativeCULong(0x00000000), UnaryNegationOperatorsHelper<NativeCULong, NativeCULong>.op_UnaryNegation(new NativeCULong(0x00000000)));
-        Assert.Equal(NativeCULong.MaxValue,        UnaryNegationOperatorsHelper<NativeCULong, NativeCULong>.op_UnaryNegation(new NativeCULong(0x00000001)));
+        Assert.Equal(NativeCULong.MaxValue, UnaryNegationOperatorsHelper<NativeCULong, NativeCULong>.op_UnaryNegation(new NativeCULong(0x00000001)));
         Assert.Equal(new NativeCULong(0x00000001), UnaryNegationOperatorsHelper<NativeCULong, NativeCULong>.op_UnaryNegation(NativeCULong.MaxValue));
     }
 
