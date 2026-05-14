@@ -11,8 +11,8 @@ public partial class NativeCULongTests
     //
 
     [Theory]
-    [InlineData("D",  "42")]
-    [InlineData("X",  "2A")]
+    [InlineData("D", "42")]
+    [InlineData("X", "2A")]
     [InlineData("X4", "002A")]
     [InlineData("D5", "00042")]
     public void ToString_Format_FormatsValue(string format, string expected)
@@ -68,8 +68,8 @@ public partial class NativeCULongTests
     //
 
     [Theory]
-    [InlineData("0",          0u)]
-    [InlineData("42",         42u)]
+    [InlineData("0", 0u)]
+    [InlineData("42", 42u)]
     [InlineData("4294967295", uint.MaxValue)]
     public void Parse_String_DefaultStyle_RoundTrips(string input, uint expected)
     {
@@ -78,8 +78,8 @@ public partial class NativeCULongTests
     }
 
     [Theory]
-    [InlineData("FF",       0xFFu)]
-    [InlineData("CAFE",     0xCAFEu)]
+    [InlineData("FF", 0xFFu)]
+    [InlineData("CAFE", 0xCAFEu)]
     [InlineData("ffffffff", uint.MaxValue)]
     public void Parse_String_HexStyle_RoundTrips(string input, uint expected)
     {
@@ -94,7 +94,7 @@ public partial class NativeCULongTests
     }
 
     [Theory]
-    [InlineData("0",  0u)]
+    [InlineData("0", 0u)]
     [InlineData("42", 42u)]
     public void TryParse_String_DefaultStyle_Success(string input, uint expected)
     {
@@ -103,7 +103,7 @@ public partial class NativeCULongTests
     }
 
     [Theory]
-    [InlineData("FF",   0xFFu)]
+    [InlineData("FF", 0xFFu)]
     [InlineData("CAFE", 0xCAFEu)]
     public void TryParse_String_HexStyle_Success(string input, uint expected)
     {
@@ -130,8 +130,8 @@ public partial class NativeCULongTests
     //
 
     [Theory]
-    [InlineData("0",          0u)]
-    [InlineData("42",         42u)]
+    [InlineData("0", 0u)]
+    [InlineData("42", 42u)]
     [InlineData("4294967295", uint.MaxValue)]
     public void Parse_Span_DefaultStyle_RoundTrips(string input, uint expected)
     {
