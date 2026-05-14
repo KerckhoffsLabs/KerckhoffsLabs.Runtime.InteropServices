@@ -467,7 +467,7 @@ public readonly struct NativeCULong
     public static NativeCULong operator *(NativeCULong left, NativeCULong right) => new(unchecked(left._value * right._value));
 
     /// <inheritdoc cref="IMultiplyOperators{TSelf, TOther, TResult}.op_CheckedMultiply(TSelf, TOther)" />
-    public static NativeCULong operator checked *(NativeCULong left, NativeCULong right) => new(checked((NativeType)checked((ulong)left._value * right._value)));
+    public static NativeCULong operator checked *(NativeCULong left, NativeCULong right) => new(checked(left._value * right._value));
 
     //
     // INumber
