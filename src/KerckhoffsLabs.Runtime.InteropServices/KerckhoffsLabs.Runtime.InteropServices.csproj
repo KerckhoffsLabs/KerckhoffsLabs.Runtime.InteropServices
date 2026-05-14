@@ -9,6 +9,7 @@
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <LangVersion>13.0</LangVersion>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+    <RuntimeIdentifiers>win-x64;win-x86;linux-x64;linux-x86</RuntimeIdentifiers>
   </PropertyGroup>
 
   <PropertyGroup>
