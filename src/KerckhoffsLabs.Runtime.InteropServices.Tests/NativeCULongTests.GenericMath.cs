@@ -709,7 +709,8 @@ public partial class NativeCULongTests
 
         if (Has32BitStorage)
         {
-            Assert.Throws<OverflowException>(() => MultiplyOperatorsHelper<NativeCULong, NativeCULong, NativeCULong>.op_CheckedMultiply(new NativeCULong(0x7FFFFFFF), new NativeCULong(2)));
+            // 0x7FFFFFFF * 2 = 0xFFFFFFFE: fits in uint, no overflow.
+            Assert.Equal(new NativeCULong(0xFFFFFFFE), MultiplyOperatorsHelper<NativeCULong, NativeCULong, NativeCULong>.op_CheckedMultiply(new NativeCULong(0x7FFFFFFF), new NativeCULong(2)));
             Assert.Throws<OverflowException>(() => MultiplyOperatorsHelper<NativeCULong, NativeCULong, NativeCULong>.op_CheckedMultiply(new NativeCULong(0x80000000), new NativeCULong(2)));
             Assert.Throws<OverflowException>(() => MultiplyOperatorsHelper<NativeCULong, NativeCULong, NativeCULong>.op_CheckedMultiply(new NativeCULong(0xFFFFFFFF), new NativeCULong(2)));
         }

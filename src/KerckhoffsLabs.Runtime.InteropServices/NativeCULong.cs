@@ -43,6 +43,13 @@ public readonly struct NativeCULong
 {
     private readonly NativeType _value;
 
+    private static NativeCULong FromNative(NativeType value)
+    {
+        NativeCULong result = default;
+        Unsafe.As<NativeCULong, NativeType>(ref result) = value;
+        return result;
+    }
+
     /// <summary>
     /// Constructs an instance from a 32-bit unsigned integer.
     /// </summary>
@@ -91,15 +98,15 @@ public readonly struct NativeCULong
     // int.CreateChecked(nativeCULong) work via INumberBase&lt;T&gt;.
 
     /// <summary>Converts an <see cref="int"/> to a <see cref="NativeCULong"/>. Negative values wrap silently; the paired <c>checked</c> operator throws.</summary>
-    public static explicit operator NativeCULong(int   value) => new(unchecked((uint)value));
+    public static explicit operator NativeCULong(int   value) => FromNative(unchecked((NativeType)value));
     /// <summary>Converts a <see cref="uint"/> to a <see cref="NativeCULong"/>. Always exact; widens to <see cref="nuint"/> storage on Unix.</summary>
-    public static explicit operator NativeCULong(uint  value) => new(value);
+    public static explicit operator NativeCULong(uint  value) => FromNative((NativeType)value);
     /// <summary>Converts a <see cref="long"/> to a <see cref="NativeCULong"/>. Out-of-range values wrap silently; the paired <c>checked</c> operator throws.</summary>
-    public static explicit operator NativeCULong(long  value) => new(unchecked((nuint)value));
+    public static explicit operator NativeCULong(long  value) => FromNative(unchecked((NativeType)value));
     /// <summary>Converts a <see cref="ulong"/> to a <see cref="NativeCULong"/>. On Windows (32-bit storage), values above <see cref="uint.MaxValue"/> wrap silently; the paired <c>checked</c> operator throws. On Unix (64-bit storage), always exact.</summary>
-    public static explicit operator NativeCULong(ulong value) => new(unchecked((nuint)value));
+    public static explicit operator NativeCULong(ulong value) => FromNative(unchecked((NativeType)value));
     /// <summary>Converts an <see cref="nuint"/> to a <see cref="NativeCULong"/>. On Windows (32-bit storage), values above <see cref="uint.MaxValue"/> wrap silently. On Unix (64-bit storage), always exact.</summary>
-    public static explicit operator NativeCULong(nuint value) => new(value);
+    public static explicit operator NativeCULong(nuint value) => FromNative(unchecked((NativeType)value));
 
     /// <summary>Converts an <see cref="int"/> to a <see cref="NativeCULong"/>. Throws <see cref="System.OverflowException"/> on negative values.</summary>
     public static explicit operator checked NativeCULong(int   value) => new(checked((uint)value));
