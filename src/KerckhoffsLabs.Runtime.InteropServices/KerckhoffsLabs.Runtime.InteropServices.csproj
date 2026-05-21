@@ -61,11 +61,14 @@
   </PropertyGroup>
 
   <!-- Compile the same source with WINDOWS defined into an isolated intermediate/output dir.
-       Reuses the outer build's restore (obj/project.assets.json), so no inner Restore is needed. -->
+       Reuses the outer build's restore (obj/project.assets.json), so no inner Restore is needed.
+       NoBuild=false is forced so the narrow build still runs when the outer pack sets NoBuild
+       (the release flow packs without rebuilding); otherwise the inner Build target trips
+       NETSDK1085 and the package would ship without its Windows runtime asset. -->
   <Target Name="_BuildNarrowVariant">
     <MSBuild Projects="$(MSBuildProjectFullPath)"
              Targets="Build"
-             Properties="NativeCULongNarrow=true;Configuration=$(Configuration);TargetFramework=$(TargetFramework);IntermediateOutputPath=$(BaseIntermediateOutputPath)narrow/$(Configuration)/$(TargetFramework)/;OutDir=$(MSBuildProjectDirectory)/bin/narrow/$(Configuration)/$(TargetFramework)/">
+             Properties="NativeCULongNarrow=true;NoBuild=false;Configuration=$(Configuration);TargetFramework=$(TargetFramework);IntermediateOutputPath=$(BaseIntermediateOutputPath)narrow/$(Configuration)/$(TargetFramework)/;OutDir=$(MSBuildProjectDirectory)/bin/narrow/$(Configuration)/$(TargetFramework)/">
       <Output TaskParameter="TargetOutputs" ItemName="_NarrowBuildOutput" />
     </MSBuild>
   </Target>
