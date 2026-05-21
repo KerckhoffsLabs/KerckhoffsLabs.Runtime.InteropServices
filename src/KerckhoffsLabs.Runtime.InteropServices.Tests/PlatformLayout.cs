@@ -9,7 +9,17 @@ namespace KerckhoffsLabs.Runtime.InteropServices.Tests;
 /// </summary>
 internal static class PlatformLayout
 {
-    internal static bool Has32BitStorage => IntPtr.Size == 4 || OperatingSystem.IsWindows();
+    // NativeCULong's storage width is fixed at COMPILE time, not by the runtime OS: the
+    // WINDOWS symbol (defined by the net*-windows target framework) selects uint storage,
+    // every other target uses nuint. So the predicate must mirror the compilation the test
+    // assembly was built for — keying off OperatingSystem.IsWindows() at runtime would be
+    // wrong whenever the build OS and the target framework disagree.
+    internal static bool Has32BitStorage =>
+#if WINDOWS
+        true;
+#else
+        IntPtr.Size == 4;
+#endif
     internal static bool Has64BitStorage => !Has32BitStorage;
 
     internal static bool NativeIntConstructorCanOverflow => IntPtr.Size != 4 && Has32BitStorage;
