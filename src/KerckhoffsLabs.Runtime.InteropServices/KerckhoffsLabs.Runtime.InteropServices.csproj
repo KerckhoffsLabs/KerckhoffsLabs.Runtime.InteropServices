@@ -75,11 +75,14 @@
        Reuses the outer build's restore (obj/project.assets.json), so no inner Restore is needed.
        NoBuild=false is forced so the narrow build still runs when the outer pack sets NoBuild
        (the release flow packs without rebuilding); otherwise the inner Build target trips
-       NETSDK1085 and the package would ship without its Windows runtime asset. -->
+       NETSDK1085 and the package would ship without its Windows runtime asset.
+       DebugType=embedded ships the narrow asset's symbols inside the DLL: the .snupkg only carries
+       the wide build's PDB (whose GUID would never match the narrow DLL), so embedding is what
+       gives the runtimes/win-* asset working symbols + SourceLink. -->
   <Target Name="_BuildNarrowVariant">
     <MSBuild Projects="$(MSBuildProjectFullPath)"
              Targets="Build"
-             Properties="NativeCULongNarrow=true;NoBuild=false;Configuration=$(Configuration);TargetFramework=$(TargetFramework);IntermediateOutputPath=$(BaseIntermediateOutputPath)narrow/$(Configuration)/$(TargetFramework)/;OutDir=$(MSBuildProjectDirectory)/bin/narrow/$(Configuration)/$(TargetFramework)/">
+             Properties="NativeCULongNarrow=true;NoBuild=false;DebugType=embedded;Configuration=$(Configuration);TargetFramework=$(TargetFramework);IntermediateOutputPath=$(BaseIntermediateOutputPath)narrow/$(Configuration)/$(TargetFramework)/;OutDir=$(MSBuildProjectDirectory)/bin/narrow/$(Configuration)/$(TargetFramework)/">
       <Output TaskParameter="TargetOutputs" ItemName="_NarrowBuildOutput" />
     </MSBuild>
   </Target>
