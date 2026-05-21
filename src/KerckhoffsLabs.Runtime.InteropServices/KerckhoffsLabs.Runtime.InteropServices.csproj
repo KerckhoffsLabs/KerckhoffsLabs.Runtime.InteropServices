@@ -72,7 +72,11 @@
   </PropertyGroup>
 
   <!-- Compile the same source with WINDOWS defined into an isolated intermediate/output dir.
-       Reuses the outer build's restore (obj/project.assets.json), so no inner Restore is needed.
+       Deliberately reuses the OUTER build's restore (obj/project.assets.json) instead of running
+       its own Restore — same project, same TFM, same package refs, so the assets are identical.
+       This means the target must run after a restore, which pack/publish always guarantee
+       (`dotnet pack` restores; the release flow restores then packs with NoBuild); the guard
+       below turns the only degenerate case (invoking it on an unrestored tree) into a clear error.
        NoBuild=false is forced so the narrow build still runs when the outer pack sets NoBuild
        (the release flow packs without rebuilding); otherwise the inner Build target trips
        NETSDK1085 and the package would ship without its Windows runtime asset.
@@ -80,6 +84,8 @@
        the wide build's PDB (whose GUID would never match the narrow DLL), so embedding is what
        gives the runtimes/win-* asset working symbols + SourceLink. -->
   <Target Name="_BuildNarrowVariant">
+    <Error Condition="!Exists('$(ProjectAssetsFile)')"
+           Text="Restore must run before packing: the narrow Windows variant reuses the main restore ($(ProjectAssetsFile))." />
     <MSBuild Projects="$(MSBuildProjectFullPath)"
              Targets="Build"
              Properties="NativeCULongNarrow=true;NoBuild=false;DebugType=embedded;Configuration=$(Configuration);TargetFramework=$(TargetFramework);IntermediateOutputPath=$(BaseIntermediateOutputPath)narrow/$(Configuration)/$(TargetFramework)/;OutDir=$(MSBuildProjectDirectory)/bin/narrow/$(Configuration)/$(TargetFramework)/">
