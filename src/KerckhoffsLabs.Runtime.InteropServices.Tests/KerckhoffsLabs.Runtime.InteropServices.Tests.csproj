@@ -1,10 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <!-- Multi-target to exercise both NativeCULong layouts: net10.0 (nuint storage) and
-         net10.0-windows (uint storage). Each test TFM binds to the matching asset of the
-         referenced project, so the WINDOWS symbol and the storage under test stay aligned. -->
-    <TargetFrameworks>net10.0;net10.0-windows</TargetFrameworks>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>13.0</LangVersion>
@@ -13,13 +10,12 @@
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
-    <RuntimeIdentifiers>win-x64;win-x86;linux-x64;linux-x86</RuntimeIdentifiers>
   </PropertyGroup>
 
-  <!-- Match the WINDOWS define to the asset under test so the #if WINDOWS layout predicates
-       in PlatformLayout align with the referenced project's storage. Keyed off the target
-       framework string (see the main project for why the intrinsic is used), not the build host. -->
-  <PropertyGroup Condition="'$([MSBuild]::GetTargetPlatformIdentifier($(TargetFramework)))' == 'windows'">
+  <!-- The suite is run twice (see CI): default = wide (nuint) build; -p:NativeCULongNarrow=true
+       compiles the referenced library AND these tests with WINDOWS defined, exercising the narrow
+       (uint) build. Has32BitStorage keys off #if WINDOWS to match the storage under test. -->
+  <PropertyGroup Condition="'$(NativeCULongNarrow)' == 'true'">
     <DefineConstants>$(DefineConstants);WINDOWS</DefineConstants>
   </PropertyGroup>
 

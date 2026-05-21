@@ -21,6 +21,21 @@ Represents the `unsigned long` type from C and C++. Mirrors the platform contrac
 
 Unlike `CULong`, `NativeCULong` implements the full generic math interface hierarchy (`IBinaryInteger<T>`, `IUnsignedNumber<T>`, etc.), `ISpanFormattable`, and `IUtf8SpanFormattable`, making it usable directly in generic numeric code and P/Invoke marshalling without an unwrap step.
 
+#### How the per-platform storage is delivered
+
+A managed value type has a single fixed size per build, so one assembly cannot be 4 bytes on
+Windows x64 and 8 bytes on Unix-LP64. The package targets a single `net10.0` and ships two builds
+of the same assembly:
+
+- `lib/net10.0` — the **nuint** build: the compile-time reference, and the runtime asset for Unix
+  (LP64) and 32-bit Windows.
+- `runtimes/win-x64/lib/net10.0`, `runtimes/win-arm64/lib/net10.0` — the **uint** build that
+  64-bit Windows resolves at runtime via the RID graph.
+
+**Consumers just reference `net10.0`** — no Windows-specific target framework, no `RuntimeIdentifier`.
+The correct `unsigned long` width is selected at runtime per OS, and that size flows correctly into
+structs that embed `NativeCULong`. Validated on both the JIT and NativeAOT, on Windows x64 and Linux x64.
+
 ## Requirements
 
 - .NET 10.0 or later

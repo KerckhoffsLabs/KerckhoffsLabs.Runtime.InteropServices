@@ -1,19 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <!--
-      Multi-target so the published package carries BOTH layouts. NativeCULong's storage type
-      is fixed at compile time (uint on Windows, nuint elsewhere — see NativeCULong.cs), so a
-      single OS-neutral assembly cannot be 4 bytes on Windows and 8 on Unix-LP64. Each platform
-      contract therefore needs its own build:
-        net10.0         -> WINDOWS undefined -> nuint storage (correct for Unix LP64 / 32-bit)
-        net10.0-windows -> WINDOWS defined   -> uint storage  (correct for Windows)
-      Windows consumers resolve the net10.0-windows asset and get the 4-byte layout. The WINDOWS
-      symbol is keyed below off the target framework, not the build host. That is what makes a
-      Linux-built package correct on Windows; the old '$(OS)'=='Windows_NT' condition shipped
-      nuint everywhere because publish runs on Linux.
-    -->
-    <TargetFrameworks>net10.0;net10.0-windows</TargetFrameworks>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -21,7 +9,6 @@
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <LangVersion>13.0</LangVersion>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
-    <RuntimeIdentifiers>win-x64;win-x86;linux-x64;linux-x86</RuntimeIdentifiers>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -42,11 +29,21 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
-  <!-- Select uint storage for the Windows-targeting build. Keyed off the target framework
-       (parsed straight from the TFM string), NOT the build host. The GetTargetPlatformIdentifier
-       intrinsic is used instead of $(TargetPlatformIdentifier) because the latter is inferred in
-       the SDK .targets imported after this body, so it is empty at evaluation time here. -->
-  <PropertyGroup Condition="'$([MSBuild]::GetTargetPlatformIdentifier($(TargetFramework)))' == 'windows'">
+  <!--
+    NativeCULong's storage is fixed at compile time: uint when WINDOWS is defined, nuint otherwise
+    (see NativeCULong.cs). A single managed assembly cannot be 4 bytes on Windows x64 and 8 on
+    Unix-LP64, so the package ships two builds of the SAME single-net10.0 assembly:
+
+      lib/net10.0                       -> default (wide) build, nuint  -> compile-time reference
+                                           and the runtime asset for Unix (LP64) and 32-bit Windows.
+      runtimes/win-x64|win-arm64/lib/.. -> narrow build, WINDOWS/uint  -> the runtime asset 64-bit
+                                           Windows resolves via the RID graph (no consumer RID needed).
+
+    Consumers reference plain net10.0 and get the correct CK_ULONG width per-OS at runtime — on the
+    JIT and on NativeAOT (both validated). Driving the narrow build off $(NativeCULongNarrow) (not a
+    TFM) keeps the package single-target for consumers.
+  -->
+  <PropertyGroup Condition="'$(NativeCULongNarrow)' == 'true'">
     <DefineConstants>$(DefineConstants);WINDOWS</DefineConstants>
   </PropertyGroup>
 
@@ -57,5 +54,31 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="all" />
   </ItemGroup>
+
+  <!-- On the outer (wide) pack, also emit the narrow (uint) build under runtimes/win-*/lib. -->
+  <PropertyGroup Condition="'$(NativeCULongNarrow)' != 'true'">
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddWindowsRidAssets</TargetsForTfmSpecificContentInPackage>
+  </PropertyGroup>
+
+  <!-- Compile the same source with WINDOWS defined into an isolated intermediate/output dir.
+       Reuses the outer build's restore (obj/project.assets.json), so no inner Restore is needed. -->
+  <Target Name="_BuildNarrowVariant">
+    <MSBuild Projects="$(MSBuildProjectFullPath)"
+             Targets="Build"
+             Properties="NativeCULongNarrow=true;Configuration=$(Configuration);TargetFramework=$(TargetFramework);IntermediateOutputPath=$(BaseIntermediateOutputPath)narrow/$(Configuration)/$(TargetFramework)/;OutDir=$(MSBuildProjectDirectory)/bin/narrow/$(Configuration)/$(TargetFramework)/">
+      <Output TaskParameter="TargetOutputs" ItemName="_NarrowBuildOutput" />
+    </MSBuild>
+  </Target>
+
+  <Target Name="_AddWindowsRidAssets" DependsOnTargets="_BuildNarrowVariant">
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="@(_NarrowBuildOutput)" Condition="'%(Extension)' == '.dll'">
+        <PackagePath>runtimes/win-x64/lib/$(TargetFramework)/</PackagePath>
+      </TfmSpecificPackageFile>
+      <TfmSpecificPackageFile Include="@(_NarrowBuildOutput)" Condition="'%(Extension)' == '.dll'">
+        <PackagePath>runtimes/win-arm64/lib/$(TargetFramework)/</PackagePath>
+      </TfmSpecificPackageFile>
+    </ItemGroup>
+  </Target>
 
 </Project>
