@@ -46,8 +46,47 @@ jobs:
       - name: Restore
         run: dotnet restore src/KerckhoffsLabs.sln --locked-mode
 
-      - name: Build
-        run: dotnet build src/KerckhoffsLabs.sln --no-restore -c Release
+      # The library is single-target net10.0; the WINDOWS storage build is selected by
+      # $(NativeCULongNarrow), not a TFM. Run the suite in both modes so each NativeCULong
+      # layout (nuint and uint) is exercised regardless of host OS.
+      - name: Test (wide / nuint)
+        run: dotnet test src/KerckhoffsLabs.sln --no-restore -c Release --logger "console;verbosity=normal"
 
-      - name: Test
-        run: dotnet test src/KerckhoffsLabs.sln --no-build -c Release --logger "console;verbosity=normal"
+      - name: Test (narrow / uint)
+        run: dotnet test src/KerckhoffsLabs.sln --no-restore -c Release -p:NativeCULongNarrow=true --logger "console;verbosity=normal"
+
+  integration:
+    name: integration-${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: install AOT toolchain (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y clang zlib1g-dev
+
+      # End-to-end proof of the shipped artifact: pack the real package, then a plain net10.0
+      # consumer (no RID, no -windows TFM) must report the correct unsigned-long width per OS
+      # (4 on Windows, pointer width on Unix) on both the JIT and NativeAOT. The consumer's
+      # exit code is the assertion.
+      - name: pack + consume (JIT and AOT)
+        shell: bash
+        run: |
+          set -e
+          dotnet pack src/KerckhoffsLabs.Runtime.InteropServices/KerckhoffsLabs.Runtime.InteropServices.csproj \
+            -c Release -o tests/feed
+          cd tests/Integration
+          echo "===== JIT ====="
+          dotnet run -c Release
+          if [ "$RUNNER_OS" = "Windows" ]; then rid=win-x64; else rid=linux-x64; fi
+          echo "===== NativeAOT ($rid) ====="
+          dotnet publish -c Release -r "$rid" -p:PublishAot=true -o aotout
+          if [ "$RUNNER_OS" = "Windows" ]; then ./aotout/Integration.exe; else ./aotout/Integration; fi

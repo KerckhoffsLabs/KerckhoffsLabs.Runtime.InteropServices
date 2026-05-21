@@ -40,3 +40,7 @@ packages/
 .env.*
 appsettings.Local.json
 appsettings.Development.local.json
+
+# Integration test build artifacts
+tests/feed/
+tests/**/aotout/
