@@ -82,7 +82,7 @@ jobs:
         run: |
           set -e
           dotnet pack src/KerckhoffsLabs.Runtime.InteropServices/KerckhoffsLabs.Runtime.InteropServices.csproj \
-            -c Release -o tests/feed -p:Version=99.0.0
+            -c Release -o tests/feed
           cd tests/Integration
           echo "===== JIT ====="
           dotnet run -c Release

@@ -9,7 +9,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="KerckhoffsLabs.Runtime.InteropServices" Version="99.0.0" />
+    <!-- Float to whatever the CI step just packed into the local feed (the only source mapped
+         for this package), so neither side hardcodes a version. -->
+    <PackageReference Include="KerckhoffsLabs.Runtime.InteropServices" Version="*" />
   </ItemGroup>
 
 </Project>
