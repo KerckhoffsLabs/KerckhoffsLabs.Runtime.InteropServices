@@ -82,11 +82,11 @@ jobs:
         run: |
           set -e
           dotnet pack src/KerckhoffsLabs.Runtime.InteropServices/KerckhoffsLabs.Runtime.InteropServices.csproj \
-            -c Release -o integration/feed -p:Version=99.0.0
-          cd integration/Consumer
+            -c Release -o tests/feed -p:Version=99.0.0
+          cd tests/Integration
           echo "===== JIT ====="
           dotnet run -c Release
           if [ "$RUNNER_OS" = "Windows" ]; then rid=win-x64; else rid=linux-x64; fi
           echo "===== NativeAOT ($rid) ====="
           dotnet publish -c Release -r "$rid" -p:PublishAot=true -o aotout
-          if [ "$RUNNER_OS" = "Windows" ]; then ./aotout/Consumer.exe; else ./aotout/Consumer; fi
+          if [ "$RUNNER_OS" = "Windows" ]; then ./aotout/Integration.exe; else ./aotout/Integration; fi

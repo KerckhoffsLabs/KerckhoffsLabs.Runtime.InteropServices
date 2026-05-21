@@ -41,6 +41,6 @@ packages/
 appsettings.Local.json
 appsettings.Development.local.json
 
-# Prototype/integration build artifacts
-integration/feed/
-integration/**/aotout/
+# Integration test build artifacts
+tests/feed/
+tests/**/aotout/
