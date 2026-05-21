@@ -40,9 +40,3 @@ packages/
 .env.*
 appsettings.Local.json
 appsettings.Development.local.json
-
-# Build artifacts of pkcs11-mock (added in Phase 0)
-src/**/runtimes/**/native/
-
-# Submodule build trees (kept separate from submodule sources)
-third-party/*/build/
