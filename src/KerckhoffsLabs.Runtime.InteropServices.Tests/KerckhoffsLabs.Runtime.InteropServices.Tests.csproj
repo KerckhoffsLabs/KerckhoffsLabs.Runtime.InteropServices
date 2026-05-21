@@ -1,7 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <!-- Multi-target to exercise both NativeCULong layouts: net10.0 (nuint storage) and
+         net10.0-windows (uint storage). Each test TFM binds to the matching asset of the
+         referenced project, so the WINDOWS symbol and the storage under test stay aligned. -->
+    <TargetFrameworks>net10.0;net10.0-windows</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>13.0</LangVersion>
@@ -13,7 +16,10 @@
     <RuntimeIdentifiers>win-x64;win-x86;linux-x64;linux-x86</RuntimeIdentifiers>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
+  <!-- Match the WINDOWS define to the asset under test so the #if WINDOWS layout predicates
+       in PlatformLayout align with the referenced project's storage. Keyed off the target
+       framework string (see the main project for why the intrinsic is used), not the build host. -->
+  <PropertyGroup Condition="'$([MSBuild]::GetTargetPlatformIdentifier($(TargetFramework)))' == 'windows'">
     <DefineConstants>$(DefineConstants);WINDOWS</DefineConstants>
   </PropertyGroup>
 

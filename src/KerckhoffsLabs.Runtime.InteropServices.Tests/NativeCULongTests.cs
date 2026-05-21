@@ -100,7 +100,7 @@ public partial class NativeCULongTests
     [Fact]
     public void MaxValueTest()
     {
-        if (!OperatingSystem.IsWindows() && Environment.Is64BitProcess)
+        if (Has64BitStorage)
         {
             Assert.Equal(unchecked(new NativeCULong((nuint)0xFFFFFFFFFFFFFFFF)), NativeCULong.MaxValue);
         }
