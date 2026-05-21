@@ -36,6 +36,14 @@ of the same assembly:
 The correct `unsigned long` width is selected at runtime per OS, and that size flows correctly into
 structs that embed `NativeCULong`. Validated on both the JIT and NativeAOT, on Windows x64 and Linux x64.
 
+> **Note (compile vs. runtime).** There is a single compile-time reference (`lib/net10.0`, the
+> `nuint` build), so on 64-bit Windows you *compile* against an 8-byte `NativeCULong` but *run*
+> against the 4-byte build. This is sound because a sequential/blittable struct's layout is resolved
+> at type-load (and at AOT publish, which is RID-specific) — never baked at compile time — so
+> `sizeof`, `Marshal.SizeOf`, `Unsafe.SizeOf`, and any embedding struct all reflect the loaded build.
+> The one thing this *can't* do is a compile-time constant whose value depends on the width, so
+> `NativeCULong` exposes none.
+
 ## Requirements
 
 - .NET 10.0 or later

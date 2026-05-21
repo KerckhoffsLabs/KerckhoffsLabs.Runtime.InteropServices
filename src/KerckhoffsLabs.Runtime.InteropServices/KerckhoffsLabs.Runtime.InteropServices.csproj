@@ -42,6 +42,17 @@
     Consumers reference plain net10.0 and get the correct CK_ULONG width per-OS at runtime — on the
     JIT and on NativeAOT (both validated). Driving the narrow build off $(NativeCULongNarrow) (not a
     TFM) keeps the package single-target for consumers.
+
+    LOAD-BEARING INVARIANT — read before changing any of this:
+    There is only ONE compile-time reference (lib/net10.0, the wide/nuint build), so on 64-bit
+    Windows a consumer COMPILES against an 8-byte NativeCULong but RUNS against the 4-byte asset.
+    This is sound ONLY because the size of a sequential/blittable struct is resolved by the runtime
+    at type-load (and by ILC at AOT publish, which is RID-specific) — it is NEVER baked at C#
+    compile time. So `sizeof`, `Marshal.SizeOf`, `Unsafe.SizeOf`, and any struct embedding
+    NativeCULong all reflect the loaded (per-RID) build, not the reference. The corollary: do NOT
+    add a public `const`/literal whose value depends on the storage width — consts ARE inlined from
+    the reference and would then be wrong on Windows. The tests/Integration job (no-RID consumer,
+    JIT + AOT, on win-x64 and linux-x64) is the regression guard for this whole scheme; keep it.
   -->
   <PropertyGroup Condition="'$(NativeCULongNarrow)' == 'true'">
     <DefineConstants>$(DefineConstants);WINDOWS</DefineConstants>
