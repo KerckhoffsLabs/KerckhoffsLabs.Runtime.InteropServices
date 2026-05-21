@@ -24,9 +24,20 @@ jobs:
       - name: Build
         run: dotnet build src/KerckhoffsLabs.sln --no-restore -c Release
 
-      - name: Test with coverage
+      # Cover both NativeCULong layouts: the wide (nuint) build reuses the Build above; the
+      # narrow (uint) build is selected by $(NativeCULongNarrow) and rebuilt here so the
+      # #if WINDOWS branch (uint storage + the checked nuint ctor) is exercised too. Codecov
+      # merges the coverage.cobertura.xml from both runs.
+      - name: Test with coverage (wide / nuint)
         run: >
           dotnet test src/KerckhoffsLabs.sln --no-build -c Release
+          --collect:"XPlat Code Coverage"
+          --results-directory ./coverage
+          --logger "console;verbosity=normal"
+
+      - name: Test with coverage (narrow / uint)
+        run: >
+          dotnet test src/KerckhoffsLabs.sln --no-restore -c Release -p:NativeCULongNarrow=true
           --collect:"XPlat Code Coverage"
           --results-directory ./coverage
           --logger "console;verbosity=normal"
