@@ -488,25 +488,64 @@ public readonly struct NativeCULong
     /// <typeparam name="TOther">The type of the source value.</typeparam>
     /// <param name="value">The value to convert.</param>
     /// <returns>The converted <see cref="NativeCULong"/>.</returns>
+    /// <exception cref="NotSupportedException">No conversion path exists for <typeparamref name="TOther"/>.</exception>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static NativeCULong CreateChecked<TOther>(TOther value)
-        where TOther : INumberBase<TOther> => new(NativeType.CreateChecked(value));
+        where TOther : INumberBase<TOther>
+    {
+        NativeCULong result;
+        if (typeof(TOther) == typeof(NativeCULong))
+        {
+            result = (NativeCULong)(object)value!;
+        }
+        else if (!TryConvertFromChecked(value, out result) && !TOther.TryConvertToChecked(value, out result))
+        {
+            throw new NotSupportedException();
+        }
+        return result;
+    }
 
     /// <summary>Converts <paramref name="value"/> to a <see cref="NativeCULong"/>, saturating at <see cref="MinValue"/> or <see cref="MaxValue"/> if the value is outside the representable range.</summary>
     /// <typeparam name="TOther">The type of the source value.</typeparam>
     /// <param name="value">The value to convert.</param>
     /// <returns>The converted <see cref="NativeCULong"/>.</returns>
+    /// <exception cref="NotSupportedException">No conversion path exists for <typeparamref name="TOther"/>.</exception>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static NativeCULong CreateSaturating<TOther>(TOther value)
-        where TOther : INumberBase<TOther> => new(NativeType.CreateSaturating(value));
+        where TOther : INumberBase<TOther>
+    {
+        NativeCULong result;
+        if (typeof(TOther) == typeof(NativeCULong))
+        {
+            result = (NativeCULong)(object)value!;
+        }
+        else if (!TryConvertFromSaturating(value, out result) && !TOther.TryConvertToSaturating(value, out result))
+        {
+            throw new NotSupportedException();
+        }
+        return result;
+    }
 
     /// <summary>Converts <paramref name="value"/> to a <see cref="NativeCULong"/>, truncating any bits that do not fit in the representable range.</summary>
     /// <typeparam name="TOther">The type of the source value.</typeparam>
     /// <param name="value">The value to convert.</param>
     /// <returns>The converted <see cref="NativeCULong"/>.</returns>
+    /// <exception cref="NotSupportedException">No conversion path exists for <typeparamref name="TOther"/>.</exception>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static NativeCULong CreateTruncating<TOther>(TOther value)
-        where TOther : INumberBase<TOther> => new(NativeType.CreateTruncating(value));
+        where TOther : INumberBase<TOther>
+    {
+        NativeCULong result;
+        if (typeof(TOther) == typeof(NativeCULong))
+        {
+            result = (NativeCULong)(object)value!;
+        }
+        else if (!TryConvertFromTruncating(value, out result) && !TOther.TryConvertToTruncating(value, out result))
+        {
+            throw new NotSupportedException();
+        }
+        return result;
+    }
 
     /// <summary>Always returns <c>false</c>; <see cref="NativeCULong"/> is an unsigned type and can never be negative.</summary>
     /// <param name="value">The value (ignored).</param>
@@ -547,36 +586,6 @@ public readonly struct NativeCULong
 
     /// <inheritdoc cref="INumber{TSelf}.Sign(TSelf)" />
     public static int Sign(NativeCULong value) => NativeType.Sign(value._value);
-
-    /// <summary>Attempts to convert <paramref name="value"/> to a <see cref="NativeCULong"/>. Returns <c>true</c> and sets <paramref name="result"/> on success; returns <c>false</c> and sets <paramref name="result"/> to <c>default</c> if the value is outside the representable range.</summary>
-    /// <typeparam name="TOther">The type of the source value.</typeparam>
-    /// <param name="value">The value to convert.</param>
-    /// <param name="result">When this method returns, contains the converted value on success, or <c>default</c> on failure.</param>
-    /// <returns><c>true</c> if the conversion succeeded; otherwise, <c>false</c>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool TryCreate<TOther>(TOther value, out NativeCULong result)
-        where TOther : INumber<TOther>
-    {
-        // TryCreate has truncating semantics (its replacement, CreateChecked, is the
-        // throwing variant). Convert TOther → ulong via the BCL dispatch, then narrow
-        // to storage width without overflow checks.
-        // Identity short-circuit: ulong.TryConvertToTruncating<ulong> returns false
-        // (BCL narrow-table omits identity); handle ulong source directly so the
-        // dispatch doesn't drop it.
-        if (typeof(TOther) == typeof(ulong))
-        {
-            ulong v = (ulong)(object)value!;
-            result = new NativeCULong(unchecked((NativeType)v));
-            return true;
-        }
-        if (TOther.TryConvertToTruncating(value, out ulong tempUlong))
-        {
-            result = new NativeCULong(unchecked((NativeType)tempUlong));
-            return true;
-        }
-        result = default;
-        return false;
-    }
 
     /// <summary>Attempts to parse a string as a <see cref="NativeCULong"/> using the specified <see cref="System.Globalization.NumberStyles"/> and format provider. Returns <c>true</c> and sets <paramref name="result"/> on success.</summary>
     /// <param name="s">The string to parse.</param>
@@ -669,25 +678,71 @@ public readonly struct NativeCULong
     /// <inheritdoc cref="INumberBase{TSelf}.MinMagnitudeNumber(TSelf, TSelf)" />
     static NativeCULong INumberBase<NativeCULong>.MinMagnitudeNumber(NativeCULong x, NativeCULong y) => Min(x, y);
 
-    // The inbound TryConvertFrom* methods route TOther → ulong via the BCL's
-    // INumberBase dispatch (TOther.TryConvertToX), then narrow ulong → storage with
-    // the appropriate semantics. NativeType is uint on Windows (32-bit storage) and
-    // nuint on Unix; using it lets a single body cover both platforms.
+    // Conversion surface, following the BCL primitive pattern (see UInt128.cs and Int32.cs
+    // in dotnet/runtime). The public CreateChecked/Saturating/Truncating above use the
+    // standard BCL dispatch (typeof identity → TryConvertFromX → TOther.TryConvertToX),
+    // so the inbound workers below are now reachable by name from CreateXxx, which lets
+    // them be `private static`.
+    //
+    // The asymmetry between From and To follows UInt128: TryConvertFromX has a private
+    // worker (called by both CreateXxx and the explicit-interface forwarder); TryConvertToX
+    // is implemented inline in the explicit-interface impl with no separate worker, because
+    // it is only ever reached through interface dispatch from other types' CreateXxx — no
+    // same-type caller invokes it by name.
+    //
+    // The From workers enumerate every numeric source type explicitly (the 17-type typeof
+    // OR-chain). Keep that list in sync with the Create_AllSupportedSources_RoundTripZero
+    // smoke matrix in NativeCULongTests.ConversionsFrom.cs — if a type is added here, the
+    // matrix needs a matching row across all three directions, and vice versa.
+    //
+    // Each worker delegates the actual conversion to NativeType.CreateXxx (uint on
+    // Windows, nuint elsewhere), whose BCL table already encodes the full signed/unsigned/
+    // float/decimal matrix. Source types not in the table fall through to
+    // TOther.TryConvertToX (which always returns false for NativeCULong — BCL primitives
+    // don't list our type in their To-tables) and ultimately to NotSupportedException —
+    // matching the BCL contract.
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool TryConvertFromChecked<TOther>(TOther value, out NativeCULong result)
+        where TOther : INumberBase<TOther>
+    {
+        if (typeof(TOther) == typeof(byte) || typeof(TOther) == typeof(sbyte) ||
+            typeof(TOther) == typeof(short) || typeof(TOther) == typeof(ushort) ||
+            typeof(TOther) == typeof(int) || typeof(TOther) == typeof(uint) ||
+            typeof(TOther) == typeof(long) || typeof(TOther) == typeof(ulong) ||
+            typeof(TOther) == typeof(nint) || typeof(TOther) == typeof(nuint) ||
+            typeof(TOther) == typeof(Int128) || typeof(TOther) == typeof(UInt128) ||
+            typeof(TOther) == typeof(char) || typeof(TOther) == typeof(decimal) ||
+            typeof(TOther) == typeof(float) || typeof(TOther) == typeof(Half) ||
+            typeof(TOther) == typeof(double))
+        {
+            result = FromNative(NativeType.CreateChecked(value));
+            return true;
+        }
+        result = default;
+        return false;
+    }
 
     /// <inheritdoc cref="INumberBase{TSelf}.TryConvertFromChecked{TOther}(TOther, out TSelf)" />
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     static bool INumberBase<NativeCULong>.TryConvertFromChecked<TOther>(TOther value, out NativeCULong result)
+        => TryConvertFromChecked(value, out result);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool TryConvertFromSaturating<TOther>(TOther value, out NativeCULong result)
+        where TOther : INumberBase<TOther>
     {
-        if (typeof(TOther) == typeof(ulong))
+        if (typeof(TOther) == typeof(byte) || typeof(TOther) == typeof(sbyte) ||
+            typeof(TOther) == typeof(short) || typeof(TOther) == typeof(ushort) ||
+            typeof(TOther) == typeof(int) || typeof(TOther) == typeof(uint) ||
+            typeof(TOther) == typeof(long) || typeof(TOther) == typeof(ulong) ||
+            typeof(TOther) == typeof(nint) || typeof(TOther) == typeof(nuint) ||
+            typeof(TOther) == typeof(Int128) || typeof(TOther) == typeof(UInt128) ||
+            typeof(TOther) == typeof(char) || typeof(TOther) == typeof(decimal) ||
+            typeof(TOther) == typeof(float) || typeof(TOther) == typeof(Half) ||
+            typeof(TOther) == typeof(double))
         {
-            ulong v = (ulong)(object)value!;
-            result = new NativeCULong(checked((NativeType)v));
-            return true;
-        }
-        if (TOther.TryConvertToChecked(value, out ulong tempUlong))
-        {
-            // checked narrow throws OverflowException if value exceeds storage width.
-            result = new NativeCULong(checked((NativeType)tempUlong));
+            result = FromNative(NativeType.CreateSaturating(value));
             return true;
         }
         result = default;
@@ -697,20 +752,23 @@ public readonly struct NativeCULong
     /// <inheritdoc cref="INumberBase{TSelf}.TryConvertFromSaturating{TOther}(TOther, out TSelf)" />
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     static bool INumberBase<NativeCULong>.TryConvertFromSaturating<TOther>(TOther value, out NativeCULong result)
+        => TryConvertFromSaturating(value, out result);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool TryConvertFromTruncating<TOther>(TOther value, out NativeCULong result)
+        where TOther : INumberBase<TOther>
     {
-        if (typeof(TOther) == typeof(ulong))
+        if (typeof(TOther) == typeof(byte) || typeof(TOther) == typeof(sbyte) ||
+            typeof(TOther) == typeof(short) || typeof(TOther) == typeof(ushort) ||
+            typeof(TOther) == typeof(int) || typeof(TOther) == typeof(uint) ||
+            typeof(TOther) == typeof(long) || typeof(TOther) == typeof(ulong) ||
+            typeof(TOther) == typeof(nint) || typeof(TOther) == typeof(nuint) ||
+            typeof(TOther) == typeof(Int128) || typeof(TOther) == typeof(UInt128) ||
+            typeof(TOther) == typeof(char) || typeof(TOther) == typeof(decimal) ||
+            typeof(TOther) == typeof(float) || typeof(TOther) == typeof(Half) ||
+            typeof(TOther) == typeof(double))
         {
-            ulong v = (ulong)(object)value!;
-            NativeType saturated = v > NativeType.MaxValue ? NativeType.MaxValue : (NativeType)v;
-            result = new NativeCULong(saturated);
-            return true;
-        }
-        if (TOther.TryConvertToSaturating(value, out ulong tempUlong))
-        {
-            NativeType saturated = tempUlong > NativeType.MaxValue
-                ? NativeType.MaxValue
-                : (NativeType)tempUlong;
-            result = new NativeCULong(saturated);
+            result = FromNative(NativeType.CreateTruncating(value));
             return true;
         }
         result = default;
@@ -720,31 +778,16 @@ public readonly struct NativeCULong
     /// <inheritdoc cref="INumberBase{TSelf}.TryConvertFromTruncating{TOther}(TOther, out TSelf)" />
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     static bool INumberBase<NativeCULong>.TryConvertFromTruncating<TOther>(TOther value, out NativeCULong result)
-    {
-        if (typeof(TOther) == typeof(ulong))
-        {
-            ulong v = (ulong)(object)value!;
-            result = new NativeCULong(unchecked((NativeType)v));
-            return true;
-        }
-        if (TOther.TryConvertToTruncating(value, out ulong tempUlong))
-        {
-            result = new NativeCULong(unchecked((NativeType)tempUlong));
-            return true;
-        }
-        result = default;
-        return false;
-    }
+        => TryConvertFromTruncating(value, out result);
 
-    // The outbound TryConvertTo* methods dispatch through TWO paths:
-    //   1) For narrowing toward a signed type (sbyte, short, int, long, nint, Int128)
-    //      we perform the cast ourselves. This is necessary because the BCL signed
-    //      types' TryConvertFromX tables don't list ulong as a recognized source —
-    //      e.g. int.TryConvertFromChecked<ulong> returns false, which would otherwise
-    //      cause CreateChecked to throw NotSupportedException for an in-range value.
-    //   2) For everything else (byte, ushort, uint, ulong, UInt128, nuint, char,
-    //      decimal, Half, float, double) we delegate to TOther.TryConvertFromX —
-    //      those types' From tables do recognize ulong as a source.
+    // TryConvertToX dispatches through two paths:
+    //   - Signed-integer targets (sbyte, short, int, long, nint, Int128) are narrowed
+    //     directly with the appropriate semantics. Per the BCL same-sign-in-From-table
+    //     convention, these types' From-tables don't list ulong as a source, so the
+    //     fallback below would miss them.
+    //   - All other targets (byte, ushort, uint, ulong, UInt128, nuint, char, decimal,
+    //     Half, float, double) delegate to TOther.TryConvertFromChecked with a ulong
+    //     source — the BCL primitives serve those from their own from-tables.
 
     /// <inheritdoc cref="INumberBase{TSelf}.TryConvertToChecked{TOther}(TSelf, out TOther)" />
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

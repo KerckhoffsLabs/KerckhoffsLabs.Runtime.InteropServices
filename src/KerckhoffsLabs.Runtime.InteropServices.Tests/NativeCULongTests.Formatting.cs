@@ -166,4 +166,66 @@ public partial class NativeCULongTests
         Assert.False(NativeCULong.TryParse("invalid".AsSpan(), CultureInfo.InvariantCulture, out NativeCULong v));
         Assert.Equal(default, v);
     }
+
+    [Fact]
+    public void Parse_Span_InvalidInput_ThrowsFormatException()
+    {
+        Assert.Throws<FormatException>(() => NativeCULong.Parse("not-a-number".AsSpan(), CultureInfo.InvariantCulture));
+    }
+
+    //
+    // TryParse — overflow paths. Pinning behavior so future refactors can't accidentally
+    // change "fail-on-overflow" into wrap or saturate.
+    //
+
+    [Fact]
+    public void TryParse_String_Overflow_ReturnsFalseAndDefault()
+    {
+        // 99999999999999999999 is wider than ulong → wider than any NativeCULong storage.
+        Assert.False(NativeCULong.TryParse("99999999999999999999", CultureInfo.InvariantCulture, out NativeCULong v));
+        Assert.Equal(default, v);
+    }
+
+    [Fact]
+    public void TryParse_Span_Overflow_ReturnsFalseAndDefault()
+    {
+        Assert.False(NativeCULong.TryParse("99999999999999999999".AsSpan(), CultureInfo.InvariantCulture, out NativeCULong v));
+        Assert.Equal(default, v);
+    }
+
+    //
+    // IUtf8SpanFormattable. NativeCULong declares the interface but provides no
+    // explicit TryFormat(Span&lt;byte&gt;, ...) — the BCL supplies the default interface
+    // method that transcodes the ISpanFormattable (char) output. These tests pin
+    // that the contract is actually wired up and produces the right bytes.
+    //
+
+    [Fact]
+    public void Utf8TryFormat_FitsDestination_WritesBytesAndReturnsTrue()
+    {
+        IUtf8SpanFormattable v = new NativeCULong(12345u);
+        Span<byte> destination = stackalloc byte[16];
+        Assert.True(v.TryFormat(destination, out int written, default, CultureInfo.InvariantCulture));
+        Assert.Equal(5, written);
+        Assert.Equal(new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35 }, destination[..written].ToArray());
+    }
+
+    [Fact]
+    public void Utf8TryFormat_HexFormat_WritesHexBytes()
+    {
+        IUtf8SpanFormattable v = new NativeCULong(0xCAFEu);
+        Span<byte> destination = stackalloc byte[16];
+        Assert.True(v.TryFormat(destination, out int written, "X", CultureInfo.InvariantCulture));
+        Assert.Equal(4, written);
+        Assert.Equal(new byte[] { (byte)'C', (byte)'A', (byte)'F', (byte)'E' }, destination[..written].ToArray());
+    }
+
+    [Fact]
+    public void Utf8TryFormat_DestinationTooSmall_ReturnsFalse()
+    {
+        IUtf8SpanFormattable v = new NativeCULong(42u);
+        Span<byte> destination = stackalloc byte[1]; // 1 byte is too small for "42"
+        Assert.False(v.TryFormat(destination, out int written, default, CultureInfo.InvariantCulture));
+        Assert.Equal(0, written);
+    }
 }
