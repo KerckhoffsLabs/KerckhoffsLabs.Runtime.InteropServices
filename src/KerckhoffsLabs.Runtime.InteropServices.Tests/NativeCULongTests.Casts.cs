@@ -28,18 +28,20 @@ public partial class NativeCULongTests
         Assert.Equal(value, (uint)c.Value);
     }
 
-    [Fact]
-    public void Cast_FromLong_RoundTrips_ZeroAndPositive()
+    [Theory]
+    [InlineData(0L, 0u)]
+    [InlineData(42L, 42u)]
+    public void Cast_FromLong_RoundTrips_ZeroAndPositive(long value, uint expected)
     {
-        Assert.Equal(0u, (uint)((NativeCULong)0L).Value);
-        Assert.Equal(42u, (uint)((NativeCULong)42L).Value);
+        Assert.Equal(expected, (uint)((NativeCULong)value).Value);
     }
 
-    [Fact]
-    public void Cast_FromULong_RoundTrips_WithinRange()
+    [Theory]
+    [InlineData(0UL, 0u)]
+    [InlineData((ulong)uint.MaxValue, uint.MaxValue)]
+    public void Cast_FromULong_RoundTrips_WithinRange(ulong value, uint expected)
     {
-        Assert.Equal(0u, (uint)((NativeCULong)0UL).Value);
-        Assert.Equal(uint.MaxValue, (uint)((NativeCULong)(ulong)uint.MaxValue).Value);
+        Assert.Equal(expected, (uint)((NativeCULong)value).Value);
     }
 
     [Fact]
@@ -53,37 +55,15 @@ public partial class NativeCULongTests
     // ---- NativeCULong -> primitive ------------------------------------------
 
     [Fact]
-    public void Cast_ToInt_PreservesValue()
+    public void Cast_ToPrimitive_PreservesValue()
     {
+        // Same value, every outbound primitive cast: round-trip via NativeCULong must
+        // produce the exact equivalent in each target type.
         NativeCULong c = new NativeCULong(42u);
         Assert.Equal(42, (int)c);
-    }
-
-    [Fact]
-    public void Cast_ToUInt_PreservesValue()
-    {
-        NativeCULong c = new NativeCULong(42u);
         Assert.Equal(42u, (uint)c);
-    }
-
-    [Fact]
-    public void Cast_ToLong_PreservesValue()
-    {
-        NativeCULong c = new NativeCULong(42u);
         Assert.Equal(42L, (long)c);
-    }
-
-    [Fact]
-    public void Cast_ToULong_PreservesValue()
-    {
-        NativeCULong c = new NativeCULong(42u);
         Assert.Equal(42UL, (ulong)c);
-    }
-
-    [Fact]
-    public void Cast_ToNUint_PreservesValue()
-    {
-        NativeCULong c = new NativeCULong(42u);
         Assert.Equal((nuint)42, (nuint)c);
     }
 
@@ -185,6 +165,45 @@ public partial class NativeCULongTests
         {
             ulong v = (ulong)c;
             Assert.Equal(42UL, v);
+        }
+    }
+
+    // Each plain (non-checked) outbound operator exists separately from its checked twin and
+    // both paths need their own coverage. The tests above gate on Has64BitStorage because
+    // they exercise the *truncation/wrap* behavior that only differs from checked on 64-bit
+    // storage; these tests exercise the plain operator dispatch itself with an in-range value,
+    // which runs on every platform.
+
+    [Fact]
+    public void Cast_ToInt_Plain_InsideUncheckedBlock()
+    {
+        NativeCULong c = new NativeCULong(42u);
+        unchecked
+        {
+            int v = (int)c;
+            Assert.Equal(42, v);
+        }
+    }
+
+    [Fact]
+    public void Cast_ToUInt_Plain_InsideUncheckedBlock()
+    {
+        NativeCULong c = new NativeCULong(42u);
+        unchecked
+        {
+            uint v = (uint)c;
+            Assert.Equal(42u, v);
+        }
+    }
+
+    [Fact]
+    public void Cast_ToLong_Plain_InsideUncheckedBlock()
+    {
+        NativeCULong c = new NativeCULong(42u);
+        unchecked
+        {
+            long v = (long)c;
+            Assert.Equal(42L, v);
         }
     }
 

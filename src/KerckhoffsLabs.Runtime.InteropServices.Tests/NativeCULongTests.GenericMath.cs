@@ -71,6 +71,12 @@ public partial class NativeCULongTests
         Assert.Equal((new NativeCULong(0x40000000), new NativeCULong(0x00000000)), BinaryIntegerHelper<NativeCULong>.DivRem(new NativeCULong(0x80000000), new NativeCULong(2)));
         Assert.Equal((new NativeCULong(0x7FFFFFFF), new NativeCULong(0x00000001)), BinaryIntegerHelper<NativeCULong>.DivRem(new NativeCULong(0xFFFFFFFF), new NativeCULong(2)));
 
+        // Non-power-of-2 divisor: the JIT can lower /2 and %2 to shift+and; a divisor like 7
+        // forces the real division path, catching a future regression where the JIT-friendly
+        // fast path masks a bug in the general case.
+        Assert.Equal((new NativeCULong(0x12345678 / 7u), new NativeCULong(0x12345678 % 7u)),
+            BinaryIntegerHelper<NativeCULong>.DivRem(new NativeCULong(0x12345678), new NativeCULong(7)));
+
         Assert.Throws<DivideByZeroException>(() => BinaryIntegerHelper<NativeCULong>.DivRem(new NativeCULong(0x00000001), new NativeCULong(0)));
     }
 
@@ -85,11 +91,22 @@ public partial class NativeCULongTests
             Assert.Equal(new NativeCULong(0x00000000), BinaryIntegerHelper<NativeCULong>.LeadingZeroCount(new NativeCULong(0x80000000)));
             Assert.Equal(new NativeCULong(0x00000000), BinaryIntegerHelper<NativeCULong>.LeadingZeroCount(new NativeCULong(0xFFFFFFFF)));
         }
+#if !WINDOWS
         else
         {
+#pragma warning disable CS8778 // intentional 64-bit-storage literals; gated at runtime by Has32BitStorage
+            // Same five low-32-bit positions as the 32-bit branch (shifted by +32 leading zeros)
+            // plus high-word positions that only exist on 64-bit storage.
             Assert.Equal(new NativeCULong(0x00000040), BinaryIntegerHelper<NativeCULong>.LeadingZeroCount(new NativeCULong(0x00000000)));
             Assert.Equal(new NativeCULong(0x0000003F), BinaryIntegerHelper<NativeCULong>.LeadingZeroCount(new NativeCULong(0x00000001)));
+            Assert.Equal(new NativeCULong(0x00000021), BinaryIntegerHelper<NativeCULong>.LeadingZeroCount(new NativeCULong(0x7FFFFFFF)));
+            Assert.Equal(new NativeCULong(0x00000020), BinaryIntegerHelper<NativeCULong>.LeadingZeroCount(new NativeCULong(0x80000000)));
+            Assert.Equal(new NativeCULong(0x00000020), BinaryIntegerHelper<NativeCULong>.LeadingZeroCount(new NativeCULong(0xFFFFFFFF)));
+            Assert.Equal(new NativeCULong(0x00000000), BinaryIntegerHelper<NativeCULong>.LeadingZeroCount(new NativeCULong((nuint)0x8000_0000_0000_0000UL)));
+            Assert.Equal(new NativeCULong(0x00000000), BinaryIntegerHelper<NativeCULong>.LeadingZeroCount(new NativeCULong((nuint)0xFFFF_FFFF_FFFF_FFFFUL)));
+#pragma warning restore CS8778
         }
+#endif
     }
 
     [Fact]
@@ -100,6 +117,17 @@ public partial class NativeCULongTests
         Assert.Equal(new NativeCULong(0x0000001F), BinaryIntegerHelper<NativeCULong>.PopCount(new NativeCULong(0x7FFFFFFF)));
         Assert.Equal(new NativeCULong(0x00000001), BinaryIntegerHelper<NativeCULong>.PopCount(new NativeCULong(0x80000000)));
         Assert.Equal(new NativeCULong(0x00000020), BinaryIntegerHelper<NativeCULong>.PopCount(new NativeCULong(0xFFFFFFFF)));
+
+#if !WINDOWS
+        if (Has64BitStorage)
+        {
+#pragma warning disable CS8778 // intentional 64-bit-storage literals; gated at runtime by Has64BitStorage
+            // Verify the high word is actually counted on 64-bit storage.
+            Assert.Equal(new NativeCULong(0x00000001), BinaryIntegerHelper<NativeCULong>.PopCount(new NativeCULong((nuint)0x8000_0000_0000_0000UL)));
+            Assert.Equal(new NativeCULong(0x00000040), BinaryIntegerHelper<NativeCULong>.PopCount(new NativeCULong((nuint)0xFFFF_FFFF_FFFF_FFFFUL)));
+#pragma warning restore CS8778
+        }
+#endif
     }
 
     [Fact]
@@ -114,6 +142,20 @@ public partial class NativeCULongTests
             Assert.Equal(new NativeCULong(0x00000001), BinaryIntegerHelper<NativeCULong>.RotateLeft(new NativeCULong(0x80000000), 1));
             Assert.Equal(new NativeCULong(0xFFFFFFFF), BinaryIntegerHelper<NativeCULong>.RotateLeft(new NativeCULong(0xFFFFFFFF), 1));
         }
+#if !WINDOWS
+        else
+        {
+#pragma warning disable CS8778 // intentional 64-bit-storage literals; gated at runtime by Has32BitStorage
+            // On 64-bit storage the rotation operates over 64 bits; the high bit must rotate
+            // back into bit 0.
+            Assert.Equal(new NativeCULong((nuint)0x00000000FFFFFFFEUL), BinaryIntegerHelper<NativeCULong>.RotateLeft(new NativeCULong(0x7FFFFFFF), 1));
+            Assert.Equal(new NativeCULong((nuint)0x0000000100000000UL), BinaryIntegerHelper<NativeCULong>.RotateLeft(new NativeCULong(0x80000000), 1));
+            Assert.Equal(new NativeCULong((nuint)0x00000001FFFFFFFEUL), BinaryIntegerHelper<NativeCULong>.RotateLeft(new NativeCULong(0xFFFFFFFF), 1));
+            Assert.Equal(new NativeCULong((nuint)0x0000000000000001UL), BinaryIntegerHelper<NativeCULong>.RotateLeft(new NativeCULong((nuint)0x8000_0000_0000_0000UL), 1));
+            Assert.Equal(new NativeCULong((nuint)0xFFFF_FFFF_FFFF_FFFFUL), BinaryIntegerHelper<NativeCULong>.RotateLeft(new NativeCULong((nuint)0xFFFF_FFFF_FFFF_FFFFUL), 1));
+#pragma warning restore CS8778
+        }
+#endif
     }
 
     [Fact]
@@ -128,6 +170,17 @@ public partial class NativeCULongTests
             Assert.Equal(new NativeCULong(0x40000000), BinaryIntegerHelper<NativeCULong>.RotateRight(new NativeCULong(0x80000000), 1));
             Assert.Equal(new NativeCULong(0xFFFFFFFF), BinaryIntegerHelper<NativeCULong>.RotateRight(new NativeCULong(0xFFFFFFFF), 1));
         }
+#if !WINDOWS
+        else
+        {
+#pragma warning disable CS8778 // intentional 64-bit-storage literals; gated at runtime by Has32BitStorage
+            // Right-rotating 1 by 1 puts the bit at position 63 (top of 64-bit storage).
+            Assert.Equal(new NativeCULong((nuint)0x8000_0000_0000_0000UL), BinaryIntegerHelper<NativeCULong>.RotateRight(new NativeCULong(0x00000001), 1));
+            Assert.Equal(new NativeCULong((nuint)0xFFFF_FFFF_FFFF_FFFFUL), BinaryIntegerHelper<NativeCULong>.RotateRight(new NativeCULong((nuint)0xFFFF_FFFF_FFFF_FFFFUL), 1));
+            Assert.Equal(new NativeCULong((nuint)0x4000_0000_0000_0000UL), BinaryIntegerHelper<NativeCULong>.RotateRight(new NativeCULong((nuint)0x8000_0000_0000_0000UL), 1));
+#pragma warning restore CS8778
+        }
+#endif
     }
 
     [Fact]
@@ -141,13 +194,22 @@ public partial class NativeCULongTests
             Assert.Equal(new NativeCULong(0x0000001F), BinaryIntegerHelper<NativeCULong>.TrailingZeroCount(new NativeCULong(0x80000000)));
             Assert.Equal(new NativeCULong(0x00000000), BinaryIntegerHelper<NativeCULong>.TrailingZeroCount(new NativeCULong(0xFFFFFFFF)));
         }
+#if !WINDOWS
         else
         {
-            // 64-bit storage: same low-bit semantics, just a wider zero value.
+#pragma warning disable CS8778 // intentional 64-bit-storage literals; gated at runtime by Has32BitStorage
+            // 64-bit storage: zero-byte count widens to 64; the high-word power-of-two
+            // exercises trailing zeros beyond the low 32 bits.
             Assert.Equal(new NativeCULong(0x00000040), BinaryIntegerHelper<NativeCULong>.TrailingZeroCount(new NativeCULong(0x00000000)));
             Assert.Equal(new NativeCULong(0x00000000), BinaryIntegerHelper<NativeCULong>.TrailingZeroCount(new NativeCULong(0x00000001)));
+            Assert.Equal(new NativeCULong(0x00000000), BinaryIntegerHelper<NativeCULong>.TrailingZeroCount(new NativeCULong(0x7FFFFFFF)));
             Assert.Equal(new NativeCULong(0x0000001F), BinaryIntegerHelper<NativeCULong>.TrailingZeroCount(new NativeCULong(0x80000000)));
+            Assert.Equal(new NativeCULong(0x00000000), BinaryIntegerHelper<NativeCULong>.TrailingZeroCount(new NativeCULong(0xFFFFFFFF)));
+            Assert.Equal(new NativeCULong(0x0000003F), BinaryIntegerHelper<NativeCULong>.TrailingZeroCount(new NativeCULong((nuint)0x8000_0000_0000_0000UL)));
+            Assert.Equal(new NativeCULong(0x00000000), BinaryIntegerHelper<NativeCULong>.TrailingZeroCount(new NativeCULong((nuint)0xFFFF_FFFF_FFFF_FFFFUL)));
+#pragma warning restore CS8778
         }
+#endif
     }
 
     [Fact]
@@ -433,6 +495,17 @@ public partial class NativeCULongTests
         Assert.Equal(new NativeCULong(0x0000001E), BinaryNumberHelper<NativeCULong>.Log2(new NativeCULong(0x7FFFFFFF)));
         Assert.Equal(new NativeCULong(0x0000001F), BinaryNumberHelper<NativeCULong>.Log2(new NativeCULong(0x80000000)));
         Assert.Equal(new NativeCULong(0x0000001F), BinaryNumberHelper<NativeCULong>.Log2(new NativeCULong(0xFFFFFFFF)));
+
+#if !WINDOWS
+        if (Has64BitStorage)
+        {
+#pragma warning disable CS8778 // intentional 64-bit-storage literals; gated at runtime by Has64BitStorage
+            // Verify Log2 reaches the high bits on 64-bit storage.
+            Assert.Equal(new NativeCULong(0x0000003F), BinaryNumberHelper<NativeCULong>.Log2(new NativeCULong((nuint)0x8000_0000_0000_0000UL)));
+            Assert.Equal(new NativeCULong(0x0000003F), BinaryNumberHelper<NativeCULong>.Log2(new NativeCULong((nuint)0xFFFF_FFFF_FFFF_FFFFUL)));
+#pragma warning restore CS8778
+        }
+#endif
     }
 
     //
@@ -481,6 +554,20 @@ public partial class NativeCULongTests
             Assert.Equal(new NativeCULong(0x7FFFFFFF), BitwiseOperatorsHelper<NativeCULong, NativeCULong, NativeCULong>.op_OnesComplement(new NativeCULong(0x80000000)));
             Assert.Equal(new NativeCULong(0x00000000), BitwiseOperatorsHelper<NativeCULong, NativeCULong, NativeCULong>.op_OnesComplement(new NativeCULong(0xFFFFFFFF)));
         }
+#if !WINDOWS
+        else
+        {
+#pragma warning disable CS8778 // intentional 64-bit-storage literals; gated at runtime by Has32BitStorage
+            // On 64-bit storage ~v flips all 64 bits — the previously implicit upper-word
+            // semantics need an explicit assertion.
+            Assert.Equal(new NativeCULong((nuint)0xFFFF_FFFF_FFFF_FFFEUL), BitwiseOperatorsHelper<NativeCULong, NativeCULong, NativeCULong>.op_OnesComplement(new NativeCULong(0x00000001)));
+            Assert.Equal(new NativeCULong((nuint)0xFFFF_FFFF_8000_0000UL), BitwiseOperatorsHelper<NativeCULong, NativeCULong, NativeCULong>.op_OnesComplement(new NativeCULong(0x7FFFFFFF)));
+            Assert.Equal(new NativeCULong((nuint)0xFFFF_FFFF_7FFF_FFFFUL), BitwiseOperatorsHelper<NativeCULong, NativeCULong, NativeCULong>.op_OnesComplement(new NativeCULong(0x80000000)));
+            Assert.Equal(new NativeCULong((nuint)0xFFFF_FFFF_0000_0000UL), BitwiseOperatorsHelper<NativeCULong, NativeCULong, NativeCULong>.op_OnesComplement(new NativeCULong(0xFFFFFFFF)));
+            Assert.Equal(new NativeCULong(0x00000000), BitwiseOperatorsHelper<NativeCULong, NativeCULong, NativeCULong>.op_OnesComplement(new NativeCULong((nuint)0xFFFF_FFFF_FFFF_FFFFUL)));
+#pragma warning restore CS8778
+        }
+#endif
     }
 
     //
@@ -564,6 +651,10 @@ public partial class NativeCULongTests
         Assert.Equal(new NativeCULong(0x3FFFFFFF), DivisionOperatorsHelper<NativeCULong, NativeCULong, NativeCULong>.op_Division(new NativeCULong(0x7FFFFFFF), new NativeCULong(2)));
         Assert.Equal(new NativeCULong(0x40000000), DivisionOperatorsHelper<NativeCULong, NativeCULong, NativeCULong>.op_Division(new NativeCULong(0x80000000), new NativeCULong(2)));
         Assert.Equal(new NativeCULong(0x7FFFFFFF), DivisionOperatorsHelper<NativeCULong, NativeCULong, NativeCULong>.op_Division(new NativeCULong(0xFFFFFFFF), new NativeCULong(2)));
+
+        // Non-power-of-2 divisor forces the general division path (the JIT lowers /2 to a shift).
+        Assert.Equal(new NativeCULong(0x12345678 / 7u),
+            DivisionOperatorsHelper<NativeCULong, NativeCULong, NativeCULong>.op_Division(new NativeCULong(0x12345678), new NativeCULong(7)));
 
         Assert.Throws<DivideByZeroException>(() => DivisionOperatorsHelper<NativeCULong, NativeCULong, NativeCULong>.op_Division(new NativeCULong(0x00000001), new NativeCULong(0)));
     }
@@ -659,6 +750,10 @@ public partial class NativeCULongTests
         Assert.Equal(new NativeCULong(0x00000001), ModulusOperatorsHelper<NativeCULong, NativeCULong, NativeCULong>.op_Modulus(new NativeCULong(0x7FFFFFFF), new NativeCULong(2)));
         Assert.Equal(new NativeCULong(0x00000000), ModulusOperatorsHelper<NativeCULong, NativeCULong, NativeCULong>.op_Modulus(new NativeCULong(0x80000000), new NativeCULong(2)));
         Assert.Equal(new NativeCULong(0x00000001), ModulusOperatorsHelper<NativeCULong, NativeCULong, NativeCULong>.op_Modulus(new NativeCULong(0xFFFFFFFF), new NativeCULong(2)));
+
+        // Non-power-of-2 divisor (the JIT can fold %2 into a bitmask).
+        Assert.Equal(new NativeCULong(0x12345678 % 7u),
+            ModulusOperatorsHelper<NativeCULong, NativeCULong, NativeCULong>.op_Modulus(new NativeCULong(0x12345678), new NativeCULong(7)));
 
         Assert.Throws<DivideByZeroException>(() => ModulusOperatorsHelper<NativeCULong, NativeCULong, NativeCULong>.op_Modulus(new NativeCULong(0x00000001), new NativeCULong(0)));
     }

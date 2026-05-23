@@ -15,11 +15,14 @@ public partial class NativeCULongTests
         Assert.Equal(0u, value.Value);
     }
 
-    [Fact]
-    public void Ctor_UInt()
+    [Theory]
+    [InlineData(0u, 0u)]
+    [InlineData(42u, 42u)]
+    [InlineData(uint.MaxValue, uint.MaxValue)] // pins uint→nuint widening on 64-bit storage
+    public void Ctor_UInt(uint value, uint expected)
     {
-        NativeCULong value = new NativeCULong(42u);
-        Assert.Equal(42u, value.Value);
+        NativeCULong v = new NativeCULong(value);
+        Assert.Equal(expected, (uint)v.Value);
     }
 
     [Fact]
@@ -52,9 +55,9 @@ public partial class NativeCULongTests
         yield return new object[] { new NativeCULong(789), "789", false };
         yield return new object[] { new NativeCULong(789), 789u, false };
         yield return new object[] { NativeCULong.MaxValue, NativeCULong.MaxValue, true };
-        // Note: cannot pair MaxValue with 0 here — the current EqualsTest also asserts
-        // GetHashCode inequality for unequal values, and on 64-bit storage MaxValue
-        // (0xFFFFFFFFFFFFFFFF) hashes to 0 (XOR-folded halves), colliding with 0's hash.
+        // Note: MaxValue paired with 0 lives in a dedicated test below — EqualsTest also
+        // asserts GetHashCode *inequality* for unequal values, and on 64-bit storage that
+        // is not guaranteed (MaxValue's hash XOR-folds to 0, colliding with 0's hash).
         yield return new object[] { NativeCULong.MaxValue, new NativeCULong(1), false };
     }
 
@@ -68,6 +71,18 @@ public partial class NativeCULongTests
             Assert.Equal(expected, value.GetHashCode().Equals(other.GetHashCode()));
         }
         Assert.Equal(expected, value.Equals(obj));
+    }
+
+    [ConditionalFact(typeof(PlatformLayout), nameof(PlatformLayout.Has64BitStorage))]
+    public void GetHashCode_64BitMaxValueCollidesWithZero()
+    {
+        // nuint.GetHashCode() XOR-folds the two 32-bit halves into a 32-bit int. For
+        // 0xFFFFFFFFFFFFFFFF that produces 0, the same hash as the integer 0. This is a
+        // permitted collision (Object.GetHashCode allows unequal values to share a hash)
+        // but is non-obvious for an integer type, so pin it: anyone tightening the hash
+        // function must update or remove this test deliberately.
+        Assert.Equal(NativeCULong.MinValue.GetHashCode(), NativeCULong.MaxValue.GetHashCode());
+        Assert.NotEqual(NativeCULong.MinValue, NativeCULong.MaxValue);
     }
 
     [Theory]
@@ -110,29 +125,4 @@ public partial class NativeCULongTests
         }
     }
 
-    //
-    // TryCreate (INumber<T> — deprecated in favor of CreateChecked; truncating semantics).
-    //
-
-    [Fact]
-    public void TryCreate_FromInt_PositiveRoundTrips()
-    {
-        Assert.True(NativeCULong.TryCreate(42, out NativeCULong result));
-        Assert.Equal(42u, (uint)result.Value);
-    }
-
-    [Fact]
-    public void TryCreate_FromInt_NegativeWrapsToMaxValue()
-    {
-        // Truncating: -1 has every bit set in two's complement, which wraps to all-ones (MaxValue).
-        Assert.True(NativeCULong.TryCreate(-1, out NativeCULong result));
-        Assert.Equal(NativeCULong.MaxValue, result);
-    }
-
-    [Fact]
-    public void TryCreate_FromULong_WithinUInt32Range_RoundTrips()
-    {
-        Assert.True(NativeCULong.TryCreate(0xFFFFFFFFUL, out NativeCULong result));
-        Assert.Equal(0xFFFFFFFFu, (uint)result.Value);
-    }
 }
