@@ -332,13 +332,13 @@ public readonly struct NativeCULong
     //
 
     /// <inheritdoc cref="IComparable.CompareTo(object?)" />
-    public int CompareTo(object? value)
+    public int CompareTo(object? obj)
     {
-        if (value is NativeCULong other)
+        if (obj is NativeCULong other)
         {
             return CompareTo(other);
         }
-        return (value is null) ? 1 : throw new ArgumentException("Object must be of type NativeCULong.", nameof(value));
+        return (obj is null) ? 1 : throw new ArgumentException("Object must be of type NativeCULong.", nameof(obj));
     }
 
     /// <inheritdoc cref="IComparable{T}.CompareTo(T)" />
