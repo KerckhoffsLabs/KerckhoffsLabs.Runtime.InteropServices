@@ -32,14 +32,9 @@ namespace KerckhoffsLabs.Runtime.InteropServices;
 /// </remarks>
 [CLSCompliant(false)]
 public readonly struct NativeCULong
-    : IEquatable<NativeCULong>,
-      IComparable,
-      IComparable<NativeCULong>,
-      ISpanFormattable,
-      IBinaryInteger<NativeCULong>,
+    : IBinaryInteger<NativeCULong>,
       IMinMaxValue<NativeCULong>,
-      IUnsignedNumber<NativeCULong>,
-      IUtf8SpanFormattable
+      IUnsignedNumber<NativeCULong>
 {
     private readonly NativeType _value;
 
@@ -106,6 +101,8 @@ public readonly struct NativeCULong
     /// <summary>Converts a <see cref="ulong"/> to a <see cref="NativeCULong"/>. On Windows (32-bit storage), values above <see cref="uint.MaxValue"/> wrap silently; the paired <c>checked</c> operator throws. On Unix (64-bit storage), always exact.</summary>
     public static explicit operator NativeCULong(ulong value) => FromNative(unchecked((NativeType)value));
     /// <summary>Converts an <see cref="nuint"/> to a <see cref="NativeCULong"/>. On Windows (32-bit storage), values above <see cref="uint.MaxValue"/> wrap silently. On Unix (64-bit storage), always exact.</summary>
+    [SuppressMessage("Minor Code Smell", "S1905:Redundant casts should not be used",
+        Justification = "The (NativeType) cast is an identity conversion only in the nuint build that Sonar analyzes; in the WINDOWS (uint) build it is a required narrowing conversion from nuint, without which the code does not compile.")]
     public static explicit operator NativeCULong(nuint value) => FromNative(unchecked((NativeType)value));
 
     /// <summary>Converts an <see cref="int"/> to a <see cref="NativeCULong"/>. Throws <see cref="System.OverflowException"/> on negative values.</summary>
@@ -171,6 +168,9 @@ public readonly struct NativeCULong
     /// <param name="provider">An object that supplies culture-specific formatting information.</param>
     /// <returns>The string representation of the value of this instance as specified by <paramref name="provider" />.</returns>
     public string ToString(IFormatProvider? provider) => _value.ToString(provider);
+
+    /// <inheritdoc cref="IFormattable.ToString(string?, IFormatProvider?)" />
+    public string ToString(string? format, IFormatProvider? formatProvider) => _value.ToString(format, formatProvider);
 
     //
     // IAdditionOperators
@@ -332,13 +332,13 @@ public readonly struct NativeCULong
     //
 
     /// <inheritdoc cref="IComparable.CompareTo(object?)" />
-    public int CompareTo(object? value)
+    public int CompareTo(object? obj)
     {
-        if (value is NativeCULong other)
+        if (obj is NativeCULong other)
         {
             return CompareTo(other);
         }
-        return (value is null) ? 1 : throw new ArgumentException("Object must be of type NativeCULong.", nameof(value));
+        return (obj is null) ? 1 : throw new ArgumentException("Object must be of type NativeCULong.", nameof(obj));
     }
 
     /// <inheritdoc cref="IComparable{T}.CompareTo(T)" />
@@ -403,13 +403,6 @@ public readonly struct NativeCULong
 
     /// <inheritdoc cref="IEqualityOperators{TSelf, TOther, TResult}.op_Inequality(TSelf, TOther)" />
     public static bool operator !=(NativeCULong left, NativeCULong right) => left._value != right._value;
-
-    //
-    // IFormattable
-    //
-
-    /// <inheritdoc cref="IFormattable.ToString(string?, IFormatProvider?)" />
-    public string ToString(string? format, IFormatProvider? formatProvider) => _value.ToString(format, formatProvider);
 
     //
     // IIncrementOperators
