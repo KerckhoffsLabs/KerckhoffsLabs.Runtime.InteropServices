@@ -46,20 +46,23 @@ public partial class NativeCULongTests
         Assert.Equal(largeValue, value.Value);
     }
 
-    public static IEnumerable<object[]> EqualsData()
+    // The second column is deliberately heterogeneous (NativeCULong, string, uint, null) to
+    // exercise Equals(object); TheoryData<,,> still gives type safety on the value/expected
+    // columns. object is the right element type here, so xUnit1042 does not apply.
+    public static TheoryData<NativeCULong, object, bool> EqualsData() => new()
     {
-        yield return new object[] { new NativeCULong(789), new NativeCULong(789), true };
-        yield return new object[] { new NativeCULong(789), new NativeCULong(0), false };
-        yield return new object[] { new NativeCULong(0), new NativeCULong(0), true };
-        yield return new object[] { new NativeCULong(789), null!, false };
-        yield return new object[] { new NativeCULong(789), "789", false };
-        yield return new object[] { new NativeCULong(789), 789u, false };
-        yield return new object[] { NativeCULong.MaxValue, NativeCULong.MaxValue, true };
+        { new NativeCULong(789), new NativeCULong(789), true },
+        { new NativeCULong(789), new NativeCULong(0), false },
+        { new NativeCULong(0), new NativeCULong(0), true },
+        { new NativeCULong(789), null!, false },
+        { new NativeCULong(789), "789", false },
+        { new NativeCULong(789), 789u, false },
+        { NativeCULong.MaxValue, NativeCULong.MaxValue, true },
         // Note: MaxValue paired with 0 lives in a dedicated test below — EqualsTest also
         // asserts GetHashCode *inequality* for unequal values, and on 64-bit storage that
         // is not guaranteed (MaxValue's hash XOR-folds to 0, colliding with 0's hash).
-        yield return new object[] { NativeCULong.MaxValue, new NativeCULong(1), false };
-    }
+        { NativeCULong.MaxValue, new NativeCULong(1), false },
+    };
 
     [Theory]
     [MemberData(nameof(EqualsData))]
