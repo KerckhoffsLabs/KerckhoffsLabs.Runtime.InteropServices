@@ -1,6 +1,7 @@
-name: sonar
+name: code-quality
 
-# CI-based SonarCloud analysis. This REPLACES SonarCloud's Automatic Analysis:
+# CI-based SonarCloud analysis + Codecov coverage upload, sharing a single build and
+# wide/narrow test pass. The SonarCloud half REPLACES SonarCloud's Automatic Analysis:
 # disable it under Project > Administration > Analysis Method, or this scan is
 # rejected (the two modes are mutually exclusive). Unlike Automatic Analysis,
 # the SonarScanner for .NET sees the MSBuild graph and imports test coverage.
@@ -58,22 +59,37 @@ jobs:
 
       # Cover both NativeCULong layouts so Sonar sees the #if WINDOWS branch too: the
       # wide (nuint) build reuses the Build above; the narrow (uint) build is selected
-      # by $(NativeCULongNarrow) and rebuilt here. OpenCover (not the default cobertura)
-      # is Sonar's first-class .NET coverage format; both runs land under ./coverage and
-      # the begin-step glob merges them.
+      # by $(NativeCULongNarrow) and rebuilt here. Each run emits BOTH coverage formats
+      # in a single pass — OpenCover (Sonar's first-class .NET format, imported by the
+      # begin-step glob) and Cobertura (uploaded to Codecov below) — so the test suite
+      # is built and executed once instead of duplicated across a separate workflow.
       - name: Test with coverage (wide / nuint)
         run: >
           dotnet test src/KerckhoffsLabs.sln --no-build -c Release
-          --collect:"XPlat Code Coverage;Format=opencover"
+          --collect:"XPlat Code Coverage;Format=opencover,cobertura"
           --results-directory ./coverage
           --logger "console;verbosity=normal"
 
       - name: Test with coverage (narrow / uint)
         run: >
           dotnet test src/KerckhoffsLabs.sln --no-restore -c Release -p:NativeCULongNarrow=true
-          --collect:"XPlat Code Coverage;Format=opencover"
+          --collect:"XPlat Code Coverage;Format=opencover,cobertura"
           --results-directory ./coverage
           --logger "console;verbosity=normal"
+
+      # Upload the Cobertura reports to Codecov. Push-only to preserve the previous
+      # coverage workflow's trigger (and to avoid touching fork PRs, where the token is
+      # unavailable). Runs before End analysis so a Codecov hiccup is independent of the
+      # Sonar import.
+      - name: Upload coverage
+        if: github.event_name == 'push'
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
+        with:
+          files: ./coverage/**/coverage.cobertura.xml
+          fail_ci_if_error: true
+          verbose: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
       - name: End analysis
         run: dotnet sonarscanner end
