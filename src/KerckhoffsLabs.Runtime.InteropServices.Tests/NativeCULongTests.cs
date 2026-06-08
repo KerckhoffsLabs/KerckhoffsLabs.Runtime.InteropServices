@@ -64,9 +64,15 @@ public partial class NativeCULongTests
         { NativeCULong.MaxValue, new NativeCULong(1), false },
     };
 
+    // xUnit1044/1045: neither NativeCULong nor the heterogeneous object column is
+    // xUnit-serializable, so Test Explorer groups these rows instead of enumerating them
+    // individually. That is purely cosmetic — every row still runs — and teaching the
+    // production NativeCULong type IXunitSerializable solely for the runner is not warranted.
+#pragma warning disable xUnit1044, xUnit1045
     [Theory]
     [MemberData(nameof(EqualsData))]
     public void EqualsTest(NativeCULong value, object obj, bool expected)
+#pragma warning restore xUnit1044, xUnit1045
     {
         if (obj is NativeCULong other)
         {
