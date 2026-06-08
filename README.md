@@ -6,6 +6,7 @@
 [![codecov](https://codecov.io/gh/KerckhoffsLabs/KerckhoffsLabs.Runtime.InteropServices/graph/badge.svg?token=9N30Z15QRA)](https://codecov.io/gh/KerckhoffsLabs/KerckhoffsLabs.Runtime.InteropServices)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=KerckhoffsLabs_KerckhoffsLabs.Runtime.InteropServices&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=KerckhoffsLabs_KerckhoffsLabs.Runtime.InteropServices)
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=KerckhoffsLabs_KerckhoffsLabs.Runtime.InteropServices&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=KerckhoffsLabs_KerckhoffsLabs.Runtime.InteropServices)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=KerckhoffsLabs_KerckhoffsLabs.Runtime.InteropServices&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=KerckhoffsLabs_KerckhoffsLabs.Runtime.InteropServices)
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=KerckhoffsLabs_KerckhoffsLabs.Runtime.InteropServices&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=KerckhoffsLabs_KerckhoffsLabs.Runtime.InteropServices)
 
 Provides platform-native interop types for use at the managed/unmanaged boundary.
