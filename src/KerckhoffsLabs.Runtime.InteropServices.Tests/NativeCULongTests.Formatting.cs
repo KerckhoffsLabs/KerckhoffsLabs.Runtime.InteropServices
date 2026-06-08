@@ -1,5 +1,6 @@
 // Licensed under the MIT License
 
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
 namespace KerckhoffsLabs.Runtime.InteropServices.Tests;
@@ -201,6 +202,8 @@ public partial class NativeCULongTests
     //
 
     [Fact]
+    [SuppressMessage("Performance", "CA1859:Use concrete types when possible for improved performance",
+        Justification = "v is intentionally typed as the interface so the test exercises the BCL default interface method that transcodes ISpanFormattable to UTF-8; using the concrete type would bind a different code path and defeat the test.")]
     public void Utf8TryFormat_FitsDestination_WritesBytesAndReturnsTrue()
     {
         IUtf8SpanFormattable v = new NativeCULong(12345u);
@@ -211,6 +214,8 @@ public partial class NativeCULongTests
     }
 
     [Fact]
+    [SuppressMessage("Performance", "CA1859:Use concrete types when possible for improved performance",
+        Justification = "v is intentionally typed as the interface so the test exercises the BCL default interface method that transcodes ISpanFormattable to UTF-8; using the concrete type would bind a different code path and defeat the test.")]
     public void Utf8TryFormat_HexFormat_WritesHexBytes()
     {
         IUtf8SpanFormattable v = new NativeCULong(0xCAFEu);
@@ -221,6 +226,8 @@ public partial class NativeCULongTests
     }
 
     [Fact]
+    [SuppressMessage("Performance", "CA1859:Use concrete types when possible for improved performance",
+        Justification = "v is intentionally typed as the interface so the test exercises the BCL default interface method that transcodes ISpanFormattable to UTF-8; using the concrete type would bind a different code path and defeat the test.")]
     public void Utf8TryFormat_DestinationTooSmall_ReturnsFalse()
     {
         IUtf8SpanFormattable v = new NativeCULong(42u);
