@@ -1,6 +1,7 @@
 # KerckhoffsLabs.Runtime.InteropServices
 
 [![NuGet](https://img.shields.io/nuget/v/KerckhoffsLabs.Runtime.InteropServices)](https://www.nuget.org/packages/KerckhoffsLabs.Runtime.InteropServices)
+[![Docs](https://img.shields.io/badge/docs-online-2ea44f)](https://kerckhoffslabs.github.io/KerckhoffsLabs.Runtime.InteropServices/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![.NET](https://img.shields.io/badge/.NET-10.0-512BD4)](https://dotnet.microsoft.com/download/dotnet/10.0)
 [![codecov](https://codecov.io/gh/KerckhoffsLabs/KerckhoffsLabs.Runtime.InteropServices/graph/badge.svg?token=9N30Z15QRA)](https://codecov.io/gh/KerckhoffsLabs/KerckhoffsLabs.Runtime.InteropServices)
