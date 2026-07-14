@@ -29,19 +29,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Mirrors the integration matrix. arch is explicit on every entry: it drives which SDK
-        # setup-dotnet installs, and defaulting it to x64 would put an x64 SDK on the arm64 runners.
+        # Mirrors the integration matrix, alphabetically. arch is explicit on every entry: it drives
+        # which SDK setup-dotnet installs, and defaulting it to x64 would put an x64 SDK on the
+        # arm64 runners (macos-latest is Apple Silicon).
         include:
+          - os: macos-latest
+            arch: arm64
+          - os: ubuntu-24.04-arm
+            arch: arm64
           - os: ubuntu-latest
             arch: x64
+          - os: windows-11-arm
+            arch: arm64
           - os: windows-latest
             arch: x64
           - os: windows-latest
             arch: x86
-          - os: ubuntu-24.04-arm
-            arch: arm64
-          - os: windows-11-arm
-            arch: arm64
 
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -71,11 +74,12 @@ jobs:
       fail-fast: false
       matrix:
         # win-arm64 is not vanity coverage: the package ships a runtimes/win-arm64 narrow asset that
-        # nothing else in CI ever loads. linux-arm64 is LP64 like linux-x64 (same expected widths),
-        # but it is a different ABI and codegen path.
+        # nothing else in CI ever loads. The Unix arm64 legs (macos-latest is Apple Silicon) are
+        # LP64 like linux-x64 and so expect the same widths, but are different ABIs and codegen
+        # paths, and macOS is a third OS resolving the lib/net10.0 fallback.
         # NOTE: 32-bit Unix (ILP32) remains unexercised — .NET has no linux-x86 runtime at all, and
         # the one ILP32 target it does support (linux-arm / Arm32) has no hosted runner.
-        os: [ubuntu-latest, windows-latest, ubuntu-24.04-arm, windows-11-arm]
+        os: [macos-latest, ubuntu-24.04-arm, ubuntu-latest, windows-11-arm, windows-latest]
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
@@ -103,10 +107,12 @@ jobs:
           # Derive the RID from the runner rather than hardcoding it: the matrix spans x64 and arm64
           # on both OSes, and publishing win-x64 on an arm64 runner would silently test the wrong asset.
           case "$RUNNER_OS/$RUNNER_ARCH" in
-            Windows/X64)   rid=win-x64   ;;
-            Windows/ARM64) rid=win-arm64 ;;
-            Linux/X64)     rid=linux-x64 ;;
             Linux/ARM64)   rid=linux-arm64 ;;
+            Linux/X64)     rid=linux-x64   ;;
+            macOS/ARM64)   rid=osx-arm64   ;;
+            macOS/X64)     rid=osx-x64     ;;
+            Windows/ARM64) rid=win-arm64   ;;
+            Windows/X64)   rid=win-x64     ;;
             *) echo "unhandled runner $RUNNER_OS/$RUNNER_ARCH" >&2; exit 1 ;;
           esac
           echo "===== NativeAOT ($rid) ====="
