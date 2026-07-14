@@ -62,7 +62,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        # win-arm64 is not vanity coverage: the package ships a runtimes/win-arm64 narrow asset that
+        # nothing else in CI ever loads. linux-arm64 is LP64 like linux-x64 (same expected widths),
+        # but it is a different ABI and codegen path.
+        # NOTE: 32-bit Unix (ILP32) remains unexercised — .NET has no linux-x86 runtime at all, and
+        # the one ILP32 target it does support (linux-arm / Arm32) has no hosted runner.
+        os: [ubuntu-latest, windows-latest, ubuntu-24.04-arm, windows-11-arm]
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
@@ -87,7 +92,15 @@ jobs:
           cd tests/Integration
           echo "===== JIT ====="
           dotnet run -c Release
-          if [ "$RUNNER_OS" = "Windows" ]; then rid=win-x64; else rid=linux-x64; fi
+          # Derive the RID from the runner rather than hardcoding it: the matrix spans x64 and arm64
+          # on both OSes, and publishing win-x64 on an arm64 runner would silently test the wrong asset.
+          case "$RUNNER_OS/$RUNNER_ARCH" in
+            Windows/X64)   rid=win-x64   ;;
+            Windows/ARM64) rid=win-arm64 ;;
+            Linux/X64)     rid=linux-x64 ;;
+            Linux/ARM64)   rid=linux-arm64 ;;
+            *) echo "unhandled runner $RUNNER_OS/$RUNNER_ARCH" >&2; exit 1 ;;
+          esac
           echo "===== NativeAOT ($rid) ====="
           dotnet publish -c Release -r "$rid" -p:PublishAot=true -o aotout
           if [ "$RUNNER_OS" = "Windows" ]; then ./aotout/Integration.exe; else ./aotout/Integration; fi
@@ -100,8 +113,11 @@ jobs:
       # It has to be a self-contained publish: GitHub has no 32-bit runner (so the app must carry
       # its own x86 runtime and run under WOW64 on the x64 one), and NativeAOT is JIT-only here
       # because ILC has no x86 target.
+      #
+      # Pinned to the x64 Windows runner. Windows-on-ARM can emulate x86, so this would likely also
+      # pass on windows-11-arm, but it would be measuring the emulator rather than the RID graph.
       - name: consume (win-x86, 32-bit)
-        if: runner.os == 'Windows'
+        if: runner.os == 'Windows' && runner.arch == 'X64'
         shell: bash
         run: |
           set -e
