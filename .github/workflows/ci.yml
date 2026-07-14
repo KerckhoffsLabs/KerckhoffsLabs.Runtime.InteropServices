@@ -91,3 +91,21 @@ jobs:
           echo "===== NativeAOT ($rid) ====="
           dotnet publish -c Release -r "$rid" -p:PublishAot=true -o aotout
           if [ "$RUNNER_OS" = "Windows" ]; then ./aotout/Integration.exe; else ./aotout/Integration; fi
+
+      # The only leg that covers the "Windows 32-bit -> lib/net10.0" row of the RID table: win-x86
+      # must resolve the WIDE (nuint) asset, not the narrow win-x64 one, because in a 32-bit process
+      # nuint is already 4 bytes — the correct unsigned long width. Getting the narrow asset here
+      # would be equally correct by luck; getting a 64-bit-wide one would be a real bug.
+      #
+      # It has to be a self-contained publish: GitHub has no 32-bit runner (so the app must carry
+      # its own x86 runtime and run under WOW64 on the x64 one), and NativeAOT is JIT-only here
+      # because ILC has no x86 target.
+      - name: consume (win-x86, 32-bit)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          set -e
+          cd tests/Integration
+          echo "===== JIT (win-x86, self-contained) ====="
+          dotnet publish -c Release -r win-x86 --self-contained true -o x86out
+          ./x86out/Integration.exe
