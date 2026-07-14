@@ -1,5 +1,3 @@
-![KerckhoffsLabs.Runtime.InteropServices](https://raw.githubusercontent.com/KerckhoffsLabs/KerckhoffsLabs.Runtime.InteropServices/main/docs/images/logo-lockup.png)
-
 # KerckhoffsLabs.Runtime.InteropServices
 
 **Platform-native interop types for the managed/unmanaged boundary.**
