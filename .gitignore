@@ -44,3 +44,4 @@ appsettings.Development.local.json
 # Integration test build artifacts
 tests/feed/
 tests/**/aotout/
+tests/**/x86out/
