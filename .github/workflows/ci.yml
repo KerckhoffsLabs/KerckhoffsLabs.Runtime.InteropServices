@@ -29,9 +29,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Mirrors the integration matrix, alphabetically. arch is explicit on every entry: it drives
-        # which SDK setup-dotnet installs, and defaulting it to x64 would put an x64 SDK on the
-        # arm64 runners (macos-latest is Apple Silicon).
         include:
           - os: macos-latest
             arch: arm64
