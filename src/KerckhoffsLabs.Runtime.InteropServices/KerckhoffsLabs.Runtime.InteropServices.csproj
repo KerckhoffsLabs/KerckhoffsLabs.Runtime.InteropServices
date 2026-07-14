@@ -18,6 +18,7 @@
     <Description>Provides support for platform-native interop types used at the managed/unmanaged boundary.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>icon.png</PackageIcon>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/KerckhoffsLabs/KerckhoffsLabs.Runtime.InteropServices</RepositoryUrl>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
@@ -60,6 +61,7 @@
 
   <ItemGroup>
     <None Include="../../README.md" Pack="true" PackagePath="\" />
+    <None Include="../../docs/images/icon.png" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>
