@@ -19,6 +19,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>icon.png</PackageIcon>
+    <PackageProjectUrl>https://kerckhoffslabs.github.io/KerckhoffsLabs.Runtime.InteropServices/</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/KerckhoffsLabs/KerckhoffsLabs.Runtime.InteropServices</RepositoryUrl>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
