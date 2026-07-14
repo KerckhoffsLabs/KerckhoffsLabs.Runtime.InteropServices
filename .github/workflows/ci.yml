@@ -29,11 +29,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # Mirrors the integration matrix. arch is explicit on every entry: it drives which SDK
+        # setup-dotnet installs, and defaulting it to x64 would put an x64 SDK on the arm64 runners.
         include:
           - os: ubuntu-latest
+            arch: x64
           - os: windows-latest
+            arch: x64
           - os: windows-latest
             arch: x86
+          - os: ubuntu-24.04-arm
+            arch: arm64
+          - os: windows-11-arm
+            arch: arm64
 
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -42,7 +50,7 @@ jobs:
         uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
         with:
           dotnet-version: '10.0.x'
-          architecture: ${{ matrix.arch || 'x64' }}
+          architecture: ${{ matrix.arch }}
 
       - name: Restore
         run: dotnet restore src/KerckhoffsLabs.sln --locked-mode
