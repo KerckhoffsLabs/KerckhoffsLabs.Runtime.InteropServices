@@ -1,4 +1,6 @@
 - name: Home
   href: index.md
+- name: Platform storage
+  href: platform-storage.md
 - name: API
   href: api/

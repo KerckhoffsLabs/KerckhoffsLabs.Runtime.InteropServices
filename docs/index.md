@@ -19,4 +19,5 @@ so it drops directly into generic numeric code and P/Invoke marshalling with no 
 
 The package ships a single `net10.0` reference and selects the correct `unsigned long` width per
 OS at runtime — no Windows-specific target framework or `RuntimeIdentifier` required. Validated on
-both the JIT and NativeAOT.
+both the JIT and NativeAOT. See [**How the per-platform storage is delivered**](platform-storage.md)
+for how that works and what it means when you compile on 64-bit Windows.
