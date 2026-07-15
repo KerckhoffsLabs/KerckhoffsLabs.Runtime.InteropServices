@@ -1,0 +1,29 @@
+# How to contribute
+
+**Please note that according to the [KerckhoffsLabs.Runtime.InteropServices license](LICENSE) all code and content intentionally submitted for inclusion is covered by the [MIT License](https://opensource.org/licenses/MIT).**
+
+## General feedback and feature requests
+
+Please start a discussion in the [KerckhoffsLabs.Runtime.InteropServices issue tracker](https://github.com/KerckhoffsLabs/KerckhoffsLabs.Runtime.InteropServices/issues).
+
+## Reporting problems
+
+Before you report a problem please make sure you have tried to find the solution by:
+
+* exploring the [KerckhoffsLabs.Runtime.InteropServices documentation](https://kerckhoffslabs.github.io/KerckhoffsLabs.Runtime.InteropServices/)
+* searching for similar topics in the [KerckhoffsLabs.Runtime.InteropServices issue tracker](https://github.com/KerckhoffsLabs/KerckhoffsLabs.Runtime.InteropServices/issues)
+
+If you have already done that and your problem still persists then please register a new issue in the [KerckhoffsLabs.Runtime.InteropServices issue tracker](https://github.com/KerckhoffsLabs/KerckhoffsLabs.Runtime.InteropServices/issues). The best way to get your problem fixed is to be as detailed as you can be about it so please make sure that the registered issue includes (if applicable):
+
+* the version of KerckhoffsLabs.Runtime.InteropServices you are using
+* the version and architecture of the operating system you are using (32-bit vs 64-bit matters for native `unsigned long` width)
+* whether you are running on the JIT or NativeAOT
+* the description of the actual result (what is actually happening) and the expected result (what would you expect to happen instead)
+* a snippet of the problematic code
+* the exception you are getting along with a full stack trace
+
+GitHub supports [markdown](https://docs.github.com/en/get-started/writing-on-github), so when filing issues make sure you check the formatting before clicking submit.
+
+## Contributing code and content
+
+Before submitting a [pull request](https://docs.github.com/en/pull-requests) with a feature or substantial code contribution please discuss it with the project members in the [KerckhoffsLabs.Runtime.InteropServices issue tracker](https://github.com/KerckhoffsLabs/KerckhoffsLabs.Runtime.InteropServices/issues). You might also read these two blog posts on contributing code: [Open Source Contribution Etiquette](https://tirania.org/blog/archive/2010/Dec-31.html) by Miguel de Icaza and [Don't "Push" Your Pull Requests](https://www.igvita.com/2011/12/19/dont-push-your-pull-requests/) by Ilya Grigorik. Note that all code submissions will be rigorously reviewed and tested by project members, and only those that maintain the existing coding style and meet both quality and design appropriateness will be merged into the source.
