@@ -22,6 +22,8 @@ If you have already done that and your problem still persists then please regist
 * a snippet of the problematic code
 * the exception you are getting along with a full stack trace
 
+If you believe you have found a security vulnerability, do not open a public issue; report it privately through [GitHub security advisories](https://github.com/KerckhoffsLabs/KerckhoffsLabs.Runtime.InteropServices/security/advisories/new) instead.
+
 GitHub supports [markdown](https://docs.github.com/en/get-started/writing-on-github), so when filing issues make sure you check the formatting before clicking submit.
 
 ## Contributing code and content
