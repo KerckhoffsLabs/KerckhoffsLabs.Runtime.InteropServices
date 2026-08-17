@@ -40,8 +40,14 @@ jobs:
           distribution: temurin
           java-version: '21'
 
+      # Pinned deliberately. Unpinned, `dotnet tool install` takes whatever is latest on the day
+      # the job runs, so the scanner — and the analyzers it embeds — can change with no commit to
+      # point at. That is how the "problems with file encoding in the source code" warning arrived
+      # (a newer XML sensor began sniffing non-source files); a floating analysis tool makes CI
+      # results non-reproducible and turns analyzer changes into surprises on unrelated PRs.
+      # Bump this the way the SHA-pinned actions above are bumped: deliberately, in its own commit.
       - name: Install SonarScanner for .NET
-        run: dotnet tool install --global dotnet-sonarscanner
+        run: dotnet tool install --global dotnet-sonarscanner --version 11.2.1
 
       - name: Restore
         run: dotnet restore src/KerckhoffsLabs.sln --locked-mode
