@@ -67,8 +67,12 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      # Pinned for the same reason as the scanner in code-quality.yml: an unpinned tool floats to
+      # latest per run. It matters more here — this job runs only on release tags and builds with
+      # --warningsAsErrors, so a docfx change that emits a new warning would first surface as a
+      # failed release rather than as a failed PR.
       - name: Install docfx
-        run: dotnet tool install --global docfx
+        run: dotnet tool install --global docfx --version 2.78.5
 
       - name: Build documentation (metadata + site)
         run: docfx docs/docfx.json --warningsAsErrors
