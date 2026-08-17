@@ -89,10 +89,7 @@ public partial class NativeCULongTests
     }
 
     [Fact]
-    public void Parse_InvalidInput_ThrowsFormatException()
-    {
-        Assert.Throws<FormatException>(() => NativeCULong.Parse("not-a-number", CultureInfo.InvariantCulture));
-    }
+    public void Parse_InvalidInput_ThrowsFormatException() => Assert.Throws<FormatException>(() => NativeCULong.Parse("not-a-number", CultureInfo.InvariantCulture));
 
     [Theory]
     [InlineData("0", 0u)]
@@ -169,10 +166,7 @@ public partial class NativeCULongTests
     }
 
     [Fact]
-    public void Parse_Span_InvalidInput_ThrowsFormatException()
-    {
-        Assert.Throws<FormatException>(() => NativeCULong.Parse("not-a-number".AsSpan(), CultureInfo.InvariantCulture));
-    }
+    public void Parse_Span_InvalidInput_ThrowsFormatException() => Assert.Throws<FormatException>(() => NativeCULong.Parse("not-a-number".AsSpan(), CultureInfo.InvariantCulture));
 
     //
     // TryParse — overflow paths. Pinning behavior so future refactors can't accidentally
@@ -222,7 +216,7 @@ public partial class NativeCULongTests
         Span<byte> destination = stackalloc byte[16];
         Assert.True(v.TryFormat(destination, out int written, "X", CultureInfo.InvariantCulture));
         Assert.Equal(4, written);
-        Assert.Equal(new byte[] { (byte)'C', (byte)'A', (byte)'F', (byte)'E' }, destination[..written].ToArray());
+        Assert.Equal([(byte)'C', (byte)'A', (byte)'F', (byte)'E'], destination[..written].ToArray());
     }
 
     [Fact]

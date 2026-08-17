@@ -52,10 +52,7 @@ public partial class NativeCULongTests
     //
 
     [Fact]
-    public void AdditiveIdentityTest()
-    {
-        Assert.Equal(new NativeCULong(0x00000000), AdditiveIdentityHelper<NativeCULong, NativeCULong>.AdditiveIdentity);
-    }
+    public void AdditiveIdentityTest() => Assert.Equal(new NativeCULong(0x00000000), AdditiveIdentityHelper<NativeCULong, NativeCULong>.AdditiveIdentity);
 
     //
     // IBinaryInteger
@@ -242,37 +239,37 @@ public partial class NativeCULongTests
     {
         if (Has32BitStorage)
         {
-            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian(new byte[] { 0x00, 0x00, 0x00, 0x00 }, isUnsigned: true, out NativeCULong result));
+            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian([0x00, 0x00, 0x00, 0x00], isUnsigned: true, out NativeCULong result));
             Assert.Equal(new NativeCULong(0x00000000), result);
 
-            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian(new byte[] { 0x00, 0x00, 0x00, 0x01 }, isUnsigned: true, out result));
+            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian([0x00, 0x00, 0x00, 0x01], isUnsigned: true, out result));
             Assert.Equal(new NativeCULong(0x00000001), result);
 
-            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian(new byte[] { 0x7F, 0xFF, 0xFF, 0xFF }, isUnsigned: true, out result));
+            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian([0x7F, 0xFF, 0xFF, 0xFF], isUnsigned: true, out result));
             Assert.Equal(new NativeCULong(0x7FFFFFFF), result);
 
-            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian(new byte[] { 0x80, 0x00, 0x00, 0x00 }, isUnsigned: true, out result));
+            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian([0x80, 0x00, 0x00, 0x00], isUnsigned: true, out result));
             Assert.Equal(new NativeCULong(0x80000000), result);
 
-            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian(new byte[] { 0xFF, 0xFF, 0xFF, 0xFF }, isUnsigned: true, out result));
+            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian([0xFF, 0xFF, 0xFF, 0xFF], isUnsigned: true, out result));
             Assert.Equal(new NativeCULong(0xFFFFFFFF), result);
         }
 #if !WINDOWS
         else
         {
-            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, isUnsigned: true, out NativeCULong result));
+            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00], isUnsigned: true, out NativeCULong result));
             Assert.Equal(new NativeCULong((nuint)0x0000000000000000UL), result);
 
-            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01 }, isUnsigned: true, out result));
+            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01], isUnsigned: true, out result));
             Assert.Equal(new NativeCULong((nuint)0x0000000000000001UL), result);
 
-            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x7F, 0xFF, 0xFF, 0xFF }, isUnsigned: true, out result));
+            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian([0x00, 0x00, 0x00, 0x00, 0x7F, 0xFF, 0xFF, 0xFF], isUnsigned: true, out result));
             Assert.Equal(new NativeCULong((nuint)0x000000007FFFFFFFUL), result);
 
-            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00 }, isUnsigned: true, out result));
+            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian([0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00], isUnsigned: true, out result));
             Assert.Equal(new NativeCULong((nuint)0x0000000080000000UL), result);
 
-            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian(new byte[] { 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF }, isUnsigned: true, out result));
+            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian([0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF], isUnsigned: true, out result));
             Assert.Equal(new NativeCULong((nuint)0x00000000FFFFFFFFUL), result);
         }
 #endif
@@ -283,37 +280,37 @@ public partial class NativeCULongTests
     {
         if (Has32BitStorage)
         {
-            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian(new byte[] { 0x00, 0x00, 0x00, 0x00 }, isUnsigned: true, out NativeCULong result));
+            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian([0x00, 0x00, 0x00, 0x00], isUnsigned: true, out NativeCULong result));
             Assert.Equal(new NativeCULong(0x00000000), result);
 
-            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian(new byte[] { 0x01, 0x00, 0x00, 0x00 }, isUnsigned: true, out result));
+            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian([0x01, 0x00, 0x00, 0x00], isUnsigned: true, out result));
             Assert.Equal(new NativeCULong(0x00000001), result);
 
-            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian(new byte[] { 0xFF, 0xFF, 0xFF, 0x7F }, isUnsigned: true, out result));
+            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian([0xFF, 0xFF, 0xFF, 0x7F], isUnsigned: true, out result));
             Assert.Equal(new NativeCULong(0x7FFFFFFF), result);
 
-            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian(new byte[] { 0x00, 0x00, 0x00, 0x80 }, isUnsigned: true, out result));
+            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian([0x00, 0x00, 0x00, 0x80], isUnsigned: true, out result));
             Assert.Equal(new NativeCULong(0x80000000), result);
 
-            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian(new byte[] { 0xFF, 0xFF, 0xFF, 0xFF }, isUnsigned: true, out result));
+            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian([0xFF, 0xFF, 0xFF, 0xFF], isUnsigned: true, out result));
             Assert.Equal(new NativeCULong(0xFFFFFFFF), result);
         }
 #if !WINDOWS
         else
         {
-            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, isUnsigned: true, out NativeCULong result));
+            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00], isUnsigned: true, out NativeCULong result));
             Assert.Equal(new NativeCULong((nuint)0x0000000000000000UL), result);
 
-            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian(new byte[] { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, isUnsigned: true, out result));
+            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian([0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00], isUnsigned: true, out result));
             Assert.Equal(new NativeCULong((nuint)0x0000000000000001UL), result);
 
-            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian(new byte[] { 0xFF, 0xFF, 0xFF, 0x7F, 0x00, 0x00, 0x00, 0x00 }, isUnsigned: true, out result));
+            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian([0xFF, 0xFF, 0xFF, 0x7F, 0x00, 0x00, 0x00, 0x00], isUnsigned: true, out result));
             Assert.Equal(new NativeCULong((nuint)0x000000007FFFFFFFUL), result);
 
-            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian(new byte[] { 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00 }, isUnsigned: true, out result));
+            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian([0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00], isUnsigned: true, out result));
             Assert.Equal(new NativeCULong((nuint)0x0000000080000000UL), result);
 
-            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian(new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00 }, isUnsigned: true, out result));
+            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian([0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00], isUnsigned: true, out result));
             Assert.Equal(new NativeCULong((nuint)0x00000000FFFFFFFFUL), result);
         }
 #endif
@@ -437,16 +434,10 @@ public partial class NativeCULongTests
     //
 
     [Fact]
-    public void TryReadBigEndian_SourceTooShort_ReturnsFalse()
-    {
-        Assert.False(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian(new byte[3], isUnsigned: true, out NativeCULong _));
-    }
+    public void TryReadBigEndian_SourceTooShort_ReturnsFalse() => Assert.False(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian(new byte[3], isUnsigned: true, out NativeCULong _));
 
     [Fact]
-    public void TryReadLittleEndian_SourceTooShort_ReturnsFalse()
-    {
-        Assert.False(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian(new byte[3], isUnsigned: true, out NativeCULong _));
-    }
+    public void TryReadLittleEndian_SourceTooShort_ReturnsFalse() => Assert.False(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian(new byte[3], isUnsigned: true, out NativeCULong _));
 
     [Fact]
     public void TryWriteBigEndian_DestinationTooSmall_ReturnsFalse()
@@ -754,10 +745,7 @@ public partial class NativeCULongTests
     //
 
     [Fact]
-    public void MultiplicativeIdentityTest()
-    {
-        Assert.Equal(new NativeCULong(0x00000001), MultiplicativeIdentityHelper<NativeCULong, NativeCULong>.MultiplicativeIdentity);
-    }
+    public void MultiplicativeIdentityTest() => Assert.Equal(new NativeCULong(0x00000001), MultiplicativeIdentityHelper<NativeCULong, NativeCULong>.MultiplicativeIdentity);
 
     //
     // IMultiplyOperators
@@ -882,22 +870,13 @@ public partial class NativeCULongTests
     //
 
     [Fact]
-    public void OneTest()
-    {
-        Assert.Equal(new NativeCULong(0x00000001), NumberBaseHelper<NativeCULong>.One);
-    }
+    public void OneTest() => Assert.Equal(new NativeCULong(0x00000001), NumberBaseHelper<NativeCULong>.One);
 
     [Fact]
-    public void ZeroTest()
-    {
-        Assert.Equal(new NativeCULong(0x00000000), NumberBaseHelper<NativeCULong>.Zero);
-    }
+    public void ZeroTest() => Assert.Equal(new NativeCULong(0x00000000), NumberBaseHelper<NativeCULong>.Zero);
 
     [Fact]
-    public void RadixTest()
-    {
-        Assert.Equal(2, NumberBaseHelper<NativeCULong>.Radix);
-    }
+    public void RadixTest() => Assert.Equal(2, NumberBaseHelper<NativeCULong>.Radix);
 
     [Fact]
     public void IsCanonicalTest()
