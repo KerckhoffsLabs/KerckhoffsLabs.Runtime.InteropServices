@@ -22,6 +22,6 @@ internal static class PlatformLayout
 #endif
     internal static bool Has64BitStorage => !Has32BitStorage;
 
-    internal static bool NativeIntConstructorCanOverflow => IntPtr.Size != 4 && Has32BitStorage;
-    internal static bool NativeIntConstructorCannotOverflow => !NativeIntConstructorCanOverflow;
+    internal static bool NativeCULongConstructorCanOverflow => IntPtr.Size != 4 && Has32BitStorage;
+    internal static bool NativeCULongConstructorCannotOverflow => !NativeCULongConstructorCanOverflow;
 }

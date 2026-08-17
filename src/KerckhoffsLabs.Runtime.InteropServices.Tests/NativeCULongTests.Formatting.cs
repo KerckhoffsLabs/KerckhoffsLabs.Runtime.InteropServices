@@ -18,7 +18,7 @@ public partial class NativeCULongTests
     [InlineData("D5", "00042")]
     public void ToString_Format_FormatsValue(string format, string expected)
     {
-        NativeCULong v = new NativeCULong(42u);
+        NativeCULong v = new(42u);
         Assert.Equal(expected, v.ToString(format));
     }
 
@@ -27,7 +27,7 @@ public partial class NativeCULongTests
     {
         // Default integer ToString does not interpolate culture-specific separators,
         // but the (IFormatProvider) overload still dispatches through the BCL.
-        NativeCULong v = new NativeCULong(1234567u);
+        NativeCULong v = new(1234567u);
         Assert.Equal("1234567", v.ToString(CultureInfo.InvariantCulture));
     }
 
@@ -39,7 +39,7 @@ public partial class NativeCULongTests
     public void TryFormat_FitsDestination_WritesAndReturnsTrue()
     {
         Span<char> destination = stackalloc char[16];
-        NativeCULong v = new NativeCULong(42u);
+        NativeCULong v = new(42u);
         Assert.True(v.TryFormat(destination, out int written, default, CultureInfo.InvariantCulture));
         Assert.Equal(2, written);
         Assert.Equal("42", destination[..written].ToString());
@@ -49,7 +49,7 @@ public partial class NativeCULongTests
     public void TryFormat_HexFormat_WritesHex()
     {
         Span<char> destination = stackalloc char[16];
-        NativeCULong v = new NativeCULong(0xCAFEu);
+        NativeCULong v = new(0xCAFEu);
         Assert.True(v.TryFormat(destination, out int written, "X", CultureInfo.InvariantCulture));
         Assert.Equal(4, written);
         Assert.Equal("CAFE", destination[..written].ToString());
@@ -59,7 +59,7 @@ public partial class NativeCULongTests
     public void TryFormat_DestinationTooSmall_ReturnsFalse()
     {
         Span<char> destination = stackalloc char[1]; // 1 char is too small for "42"
-        NativeCULong v = new NativeCULong(42u);
+        NativeCULong v = new(42u);
         Assert.False(v.TryFormat(destination, out int written, default, CultureInfo.InvariantCulture));
         Assert.Equal(0, written);
     }

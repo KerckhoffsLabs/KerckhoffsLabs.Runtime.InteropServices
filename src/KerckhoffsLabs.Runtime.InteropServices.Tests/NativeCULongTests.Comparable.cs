@@ -33,7 +33,7 @@ public partial class NativeCULongTests
     [Fact]
     public void CompareTo_Object_SameType_DelegatesToTyped()
     {
-        NativeCULong a = new NativeCULong(42u);
+        NativeCULong a = new(42u);
         Assert.Equal(0, a.CompareTo((object)new NativeCULong(42u)));
         Assert.InRange(a.CompareTo((object)new NativeCULong(43u)), int.MinValue, -1);
         Assert.InRange(a.CompareTo((object)new NativeCULong(41u)), 1, int.MaxValue);

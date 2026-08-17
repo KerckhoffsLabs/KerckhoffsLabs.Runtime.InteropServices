@@ -8,9 +8,9 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 #if WINDOWS
-using NativeType = System.UInt32;
+using NativeType = uint;
 #else
-using NativeType = System.UIntPtr;
+using NativeType = nuint;
 #endif
 
 namespace KerckhoffsLabs.Runtime.InteropServices;
@@ -232,12 +232,12 @@ public readonly struct NativeCULong
     /// <inheritdoc cref="IBinaryInteger{TSelf}.TryWriteLittleEndian(Span{byte}, out int)" />
     unsafe bool IBinaryInteger<NativeCULong>.TryWriteLittleEndian(Span<byte> destination, out int bytesWritten)
     {
-        if (destination.Length >= sizeof(NativeCULong))
+        if (destination.Length >= sizeof(NativeType))
         {
             NativeType value = BitConverter.IsLittleEndian ? _value : BinaryPrimitives.ReverseEndianness(_value);
             Unsafe.WriteUnaligned(ref MemoryMarshal.GetReference(destination), value);
 
-            bytesWritten = sizeof(NativeCULong);
+            bytesWritten = sizeof(NativeType);
             return true;
         }
         else
@@ -250,12 +250,12 @@ public readonly struct NativeCULong
     /// <inheritdoc cref="IBinaryInteger{TSelf}.TryWriteBigEndian(Span{byte}, out int)" />
     unsafe bool IBinaryInteger<NativeCULong>.TryWriteBigEndian(Span<byte> destination, out int bytesWritten)
     {
-        if (destination.Length >= sizeof(NativeCULong))
+        if (destination.Length >= sizeof(NativeType))
         {
             NativeType value = BitConverter.IsLittleEndian ? BinaryPrimitives.ReverseEndianness(_value) : _value;
             Unsafe.WriteUnaligned(ref MemoryMarshal.GetReference(destination), value);
 
-            bytesWritten = sizeof(NativeCULong);
+            bytesWritten = sizeof(NativeType);
             return true;
         }
         else
@@ -493,7 +493,7 @@ public readonly struct NativeCULong
         NativeCULong result;
         if (typeof(TOther) == typeof(NativeCULong))
         {
-            result = (NativeCULong)(object)value!;
+            result = (NativeCULong)(object)value;
         }
         else if (!TryConvertFromChecked(value, out result) && !TOther.TryConvertToChecked(value, out result))
         {
@@ -514,7 +514,7 @@ public readonly struct NativeCULong
         NativeCULong result;
         if (typeof(TOther) == typeof(NativeCULong))
         {
-            result = (NativeCULong)(object)value!;
+            result = (NativeCULong)(object)value;
         }
         else if (!TryConvertFromSaturating(value, out result) && !TOther.TryConvertToSaturating(value, out result))
         {
@@ -535,7 +535,7 @@ public readonly struct NativeCULong
         NativeCULong result;
         if (typeof(TOther) == typeof(NativeCULong))
         {
-            result = (NativeCULong)(object)value!;
+            result = (NativeCULong)(object)value;
         }
         else if (!TryConvertFromTruncating(value, out result) && !TOther.TryConvertToTruncating(value, out result))
         {

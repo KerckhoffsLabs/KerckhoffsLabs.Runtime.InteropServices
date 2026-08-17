@@ -1,7 +1,6 @@
 // Licensed under the MIT License
 // Adapted from dotnet/runtime UInt32Tests.GenericMath.cs for NativeCULong
 
-using System.Numerics;
 using static KerckhoffsLabs.Runtime.InteropServices.Tests.PlatformLayout;
 
 namespace KerckhoffsLabs.Runtime.InteropServices.Tests;
@@ -241,11 +240,9 @@ public partial class NativeCULongTests
     [Fact]
     public void TryReadBigEndianTest()
     {
-        NativeCULong result;
-
         if (Has32BitStorage)
         {
-            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian(new byte[] { 0x00, 0x00, 0x00, 0x00 }, isUnsigned: true, out result));
+            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian(new byte[] { 0x00, 0x00, 0x00, 0x00 }, isUnsigned: true, out NativeCULong result));
             Assert.Equal(new NativeCULong(0x00000000), result);
 
             Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian(new byte[] { 0x00, 0x00, 0x00, 0x01 }, isUnsigned: true, out result));
@@ -263,7 +260,7 @@ public partial class NativeCULongTests
 #if !WINDOWS
         else
         {
-            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, isUnsigned: true, out result));
+            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, isUnsigned: true, out NativeCULong result));
             Assert.Equal(new NativeCULong((nuint)0x0000000000000000UL), result);
 
             Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01 }, isUnsigned: true, out result));
@@ -284,11 +281,9 @@ public partial class NativeCULongTests
     [Fact]
     public void TryReadLittleEndianTest()
     {
-        NativeCULong result;
-
         if (Has32BitStorage)
         {
-            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian(new byte[] { 0x00, 0x00, 0x00, 0x00 }, isUnsigned: true, out result));
+            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian(new byte[] { 0x00, 0x00, 0x00, 0x00 }, isUnsigned: true, out NativeCULong result));
             Assert.Equal(new NativeCULong(0x00000000), result);
 
             Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian(new byte[] { 0x01, 0x00, 0x00, 0x00 }, isUnsigned: true, out result));
@@ -306,7 +301,7 @@ public partial class NativeCULongTests
 #if !WINDOWS
         else
         {
-            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, isUnsigned: true, out result));
+            Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, isUnsigned: true, out NativeCULong result));
             Assert.Equal(new NativeCULong((nuint)0x0000000000000000UL), result);
 
             Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian(new byte[] { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, isUnsigned: true, out result));
@@ -330,9 +325,8 @@ public partial class NativeCULongTests
         if (Has32BitStorage)
         {
             Span<byte> destination = stackalloc byte[4];
-            int bytesWritten;
 
-            Assert.True(BinaryIntegerHelper<NativeCULong>.TryWriteBigEndian(new NativeCULong(0x00000000), destination, out bytesWritten));
+            Assert.True(BinaryIntegerHelper<NativeCULong>.TryWriteBigEndian(new NativeCULong(0x00000000), destination, out int bytesWritten));
             Assert.Equal(4, bytesWritten);
             Assert.Equal(new byte[] { 0x00, 0x00, 0x00, 0x00 }, destination.ToArray());
 
@@ -356,9 +350,8 @@ public partial class NativeCULongTests
         else
         {
             Span<byte> destination = stackalloc byte[8];
-            int bytesWritten;
 
-            Assert.True(BinaryIntegerHelper<NativeCULong>.TryWriteBigEndian(new NativeCULong((nuint)0x0000000000000000UL), destination, out bytesWritten));
+            Assert.True(BinaryIntegerHelper<NativeCULong>.TryWriteBigEndian(new NativeCULong((nuint)0x0000000000000000UL), destination, out int bytesWritten));
             Assert.Equal(8, bytesWritten);
             Assert.Equal(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, destination.ToArray());
 
@@ -387,9 +380,8 @@ public partial class NativeCULongTests
         if (Has32BitStorage)
         {
             Span<byte> destination = stackalloc byte[4];
-            int bytesWritten;
 
-            Assert.True(BinaryIntegerHelper<NativeCULong>.TryWriteLittleEndian(new NativeCULong(0x00000000), destination, out bytesWritten));
+            Assert.True(BinaryIntegerHelper<NativeCULong>.TryWriteLittleEndian(new NativeCULong(0x00000000), destination, out int bytesWritten));
             Assert.Equal(4, bytesWritten);
             Assert.Equal(new byte[] { 0x00, 0x00, 0x00, 0x00 }, destination.ToArray());
 
@@ -413,9 +405,8 @@ public partial class NativeCULongTests
         else
         {
             Span<byte> destination = stackalloc byte[8];
-            int bytesWritten;
 
-            Assert.True(BinaryIntegerHelper<NativeCULong>.TryWriteLittleEndian(new NativeCULong((nuint)0x0000000000000000UL), destination, out bytesWritten));
+            Assert.True(BinaryIntegerHelper<NativeCULong>.TryWriteLittleEndian(new NativeCULong((nuint)0x0000000000000000UL), destination, out int bytesWritten));
             Assert.Equal(8, bytesWritten);
             Assert.Equal(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, destination.ToArray());
 

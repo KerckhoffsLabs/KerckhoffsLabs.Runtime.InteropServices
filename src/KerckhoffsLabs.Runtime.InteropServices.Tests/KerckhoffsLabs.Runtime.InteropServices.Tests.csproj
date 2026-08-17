@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -7,6 +7,11 @@
     <LangVersion>13.0</LangVersion>
     <IsPackable>false</IsPackable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- Directory.Build.props turns on GenerateDocumentationFile repo-wide (IDE0005 only runs at
+         build when it is set, see dotnet/roslyn#41640) and TreatWarningsAsErrors. This project has
+         no public API to document — the public generic-math helper shims exist to reach static
+         abstract members from tests — so CS1591 would be 300+ errors of pure noise here. -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
