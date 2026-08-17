@@ -1,7 +1,5 @@
 // Licensed under the MIT License
 
-using KerckhoffsLabs.Runtime.InteropServices;
-
 namespace KerckhoffsLabs.Runtime.InteropServices.Tests;
 
 public partial class NativeCULongTests
@@ -59,7 +57,7 @@ public partial class NativeCULongTests
     {
         // Same value, every outbound primitive cast: round-trip via NativeCULong must
         // produce the exact equivalent in each target type.
-        NativeCULong c = new NativeCULong(42u);
+        NativeCULong c = new(42u);
         Assert.Equal(42, (int)c);
         Assert.Equal(42u, (uint)c);
         Assert.Equal(42L, (long)c);
@@ -120,7 +118,7 @@ public partial class NativeCULongTests
     {
         // On 64-bit Unix, NativeCULong is backed by nuint (64-bit), so it can hold
         // values larger than int.MaxValue. The checked outgoing operator must throw.
-        NativeCULong tooBig = new NativeCULong((nuint)((long)int.MaxValue + 1));
+        NativeCULong tooBig = new((nuint)((long)int.MaxValue + 1));
         Assert.Throws<System.OverflowException>(() =>
         {
             int _ = (int)tooBig;
@@ -130,7 +128,7 @@ public partial class NativeCULongTests
     [ConditionalFact(typeof(PlatformLayout), nameof(PlatformLayout.Has64BitStorage))]
     public void Cast_ToInt_WrapsOnUnix64InUncheckedBlock()
     {
-        NativeCULong tooBig = new NativeCULong((nuint)((long)int.MaxValue + 1));
+        NativeCULong tooBig = new((nuint)((long)int.MaxValue + 1));
         unchecked
         {
             int wrapped = (int)tooBig;
@@ -160,7 +158,7 @@ public partial class NativeCULongTests
         // NativeCULong → ulong is always exact (ulong holds any NativeCULong value),
         // so plain and checked produce identical results; this just exercises the
         // plain operator path that the default-checked context bypasses.
-        NativeCULong c = new NativeCULong(42u);
+        NativeCULong c = new(42u);
         unchecked
         {
             ulong v = (ulong)c;
@@ -177,7 +175,7 @@ public partial class NativeCULongTests
     [Fact]
     public void Cast_ToInt_Plain_InsideUncheckedBlock()
     {
-        NativeCULong c = new NativeCULong(42u);
+        NativeCULong c = new(42u);
         unchecked
         {
             int v = (int)c;
@@ -188,7 +186,7 @@ public partial class NativeCULongTests
     [Fact]
     public void Cast_ToUInt_Plain_InsideUncheckedBlock()
     {
-        NativeCULong c = new NativeCULong(42u);
+        NativeCULong c = new(42u);
         unchecked
         {
             uint v = (uint)c;
@@ -199,7 +197,7 @@ public partial class NativeCULongTests
     [Fact]
     public void Cast_ToLong_Plain_InsideUncheckedBlock()
     {
-        NativeCULong c = new NativeCULong(42u);
+        NativeCULong c = new(42u);
         unchecked
         {
             long v = (long)c;
@@ -223,7 +221,7 @@ public partial class NativeCULongTests
     [ConditionalFact(typeof(PlatformLayout), nameof(PlatformLayout.Has64BitStorage))]
     public void Cast_ToUInt_Plain_TruncatesOn64BitStorage_InsideUncheckedBlock()
     {
-        NativeCULong tooBig = new NativeCULong(unchecked((nuint)((ulong)uint.MaxValue + 1UL)));
+        NativeCULong tooBig = new(unchecked((nuint)((ulong)uint.MaxValue + 1UL)));
         unchecked
         {
             uint wrapped = (uint)tooBig;
@@ -236,7 +234,7 @@ public partial class NativeCULongTests
     public void Cast_ToLong_Plain_WrapsOn64BitStorage_InsideUncheckedBlock()
     {
         // Value > long.MaxValue: top bit set in 64-bit storage; plain cast reinterprets as negative.
-        NativeCULong huge = new NativeCULong(unchecked((nuint)0x8000_0000_0000_0000UL));
+        NativeCULong huge = new(unchecked((nuint)0x8000_0000_0000_0000UL));
         unchecked
         {
             long wrapped = (long)huge;

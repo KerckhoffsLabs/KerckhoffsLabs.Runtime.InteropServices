@@ -1,7 +1,6 @@
 // Licensed under the MIT License
 
 using System.Runtime.InteropServices;
-using KerckhoffsLabs.Runtime.InteropServices;
 using static KerckhoffsLabs.Runtime.InteropServices.Tests.PlatformLayout;
 
 namespace KerckhoffsLabs.Runtime.InteropServices.Tests;
@@ -11,7 +10,7 @@ public partial class NativeCULongTests
     [Fact]
     public void Ctor_Empty()
     {
-        NativeCULong value = new NativeCULong();
+        NativeCULong value = new();
         Assert.Equal(0u, value.Value);
     }
 
@@ -21,28 +20,28 @@ public partial class NativeCULongTests
     [InlineData(uint.MaxValue, uint.MaxValue)] // pins uint→nuint widening on 64-bit storage
     public void Ctor_UInt(uint value, uint expected)
     {
-        NativeCULong v = new NativeCULong(value);
+        NativeCULong v = new(value);
         Assert.Equal(expected, (uint)v.Value);
     }
 
     [Fact]
     public void Ctor_NUInt()
     {
-        NativeCULong value = new NativeCULong((nuint)42);
+        NativeCULong value = new((nuint)42);
         Assert.Equal(42u, value.Value);
     }
 
-    [ConditionalFact(typeof(PlatformLayout), nameof(PlatformLayout.NativeIntConstructorCanOverflow))]
+    [ConditionalFact(typeof(PlatformLayout), nameof(PlatformLayout.NativeCULongConstructorCanOverflow))]
     public void Ctor_NUInt_OutOfRange()
     {
         Assert.Throws<OverflowException>(() => new NativeCULong(unchecked(((nuint)uint.MaxValue) + 1)));
     }
 
-    [ConditionalFact(typeof(PlatformLayout), nameof(PlatformLayout.NativeIntConstructorCannotOverflow))]
+    [ConditionalFact(typeof(PlatformLayout), nameof(PlatformLayout.NativeCULongConstructorCannotOverflow))]
     public void Ctor_NUInt_LargeValue()
     {
         nuint largeValue = unchecked(((nuint)uint.MaxValue) + 1);
-        NativeCULong value = new NativeCULong(largeValue);
+        NativeCULong value = new(largeValue);
         Assert.Equal(largeValue, value.Value);
     }
 
@@ -100,9 +99,9 @@ public partial class NativeCULongTests
     [InlineData(uint.MaxValue, "4294967295")]
     public void ToStringTest(uint value, string expected)
     {
-        NativeCULong NativeCULong = new NativeCULong(value);
+        NativeCULong nativeCULong = new(value);
 
-        Assert.Equal(expected, NativeCULong.ToString());
+        Assert.Equal(expected, nativeCULong.ToString());
     }
 
     [Fact]

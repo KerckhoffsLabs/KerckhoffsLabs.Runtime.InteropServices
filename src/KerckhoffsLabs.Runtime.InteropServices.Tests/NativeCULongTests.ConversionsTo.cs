@@ -8,8 +8,6 @@
 //
 // From-direction tests (NativeCULong <- TOther) live in NativeCULongTests.ConversionsFrom.cs.
 
-using KerckhoffsLabs.Runtime.InteropServices;
-
 namespace KerckhoffsLabs.Runtime.InteropServices.Tests;
 
 public partial class NativeCULongTests
@@ -79,7 +77,7 @@ public partial class NativeCULongTests
     {
         // Only reachable on 64-bit storage — uint storage can never exceed long.MaxValue.
 #pragma warning disable CS8778
-        NativeCULong tooBig = new NativeCULong((nuint)0x8000_0000_0000_0000UL);
+        NativeCULong tooBig = new((nuint)0x8000_0000_0000_0000UL);
 #pragma warning restore CS8778
         Assert.Throws<OverflowException>(() => NumberBaseHelper<long>.CreateChecked<NativeCULong>(tooBig));
     }
@@ -156,7 +154,7 @@ public partial class NativeCULongTests
     public void CreateSaturating_ToLong_ExceedingSaturatesToMaxOn64BitStorage()
     {
 #pragma warning disable CS8778
-        NativeCULong tooBig = new NativeCULong((nuint)0x8000_0000_0000_0000UL);
+        NativeCULong tooBig = new((nuint)0x8000_0000_0000_0000UL);
 #pragma warning restore CS8778
         Assert.Equal(long.MaxValue, NumberBaseHelper<long>.CreateSaturating<NativeCULong>(tooBig));
     }

@@ -9,7 +9,6 @@
 // To-direction tests (TOther <- NativeCULong) live in NativeCULongTests.ConversionsTo.cs.
 
 using System.Numerics;
-using KerckhoffsLabs.Runtime.InteropServices;
 
 namespace KerckhoffsLabs.Runtime.InteropServices.Tests;
 
@@ -331,21 +330,21 @@ public partial class NativeCULongTests
     [Fact]
     public void CreateChecked_FromNativeCULong_Identity()
     {
-        NativeCULong v = new NativeCULong(0xDEADBEEFu);
+        NativeCULong v = new(0xDEADBEEFu);
         Assert.Equal(v, NumberBaseHelper<NativeCULong>.CreateChecked<NativeCULong>(v));
     }
 
     [Fact]
     public void CreateSaturating_FromNativeCULong_Identity()
     {
-        NativeCULong v = new NativeCULong(0xDEADBEEFu);
+        NativeCULong v = new(0xDEADBEEFu);
         Assert.Equal(v, NumberBaseHelper<NativeCULong>.CreateSaturating<NativeCULong>(v));
     }
 
     [Fact]
     public void CreateTruncating_FromNativeCULong_Identity()
     {
-        NativeCULong v = new NativeCULong(0xDEADBEEFu);
+        NativeCULong v = new(0xDEADBEEFu);
         Assert.Equal(v, NumberBaseHelper<NativeCULong>.CreateTruncating<NativeCULong>(v));
     }
 
