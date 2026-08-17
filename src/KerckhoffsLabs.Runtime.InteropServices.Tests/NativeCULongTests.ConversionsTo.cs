@@ -17,60 +17,33 @@ public partial class NativeCULongTests
     //
 
     [Fact]
-    public void CreateChecked_ToByte_FitsRoundTrips()
-    {
-        Assert.Equal((byte)0xFF, NumberBaseHelper<byte>.CreateChecked<NativeCULong>(new NativeCULong(0xFF)));
-    }
+    public void CreateChecked_ToByte_FitsRoundTrips() => Assert.Equal((byte)0xFF, NumberBaseHelper<byte>.CreateChecked<NativeCULong>(new NativeCULong(0xFF)));
 
     [Fact]
-    public void CreateChecked_ToByte_ExceedingThrows()
-    {
-        Assert.Throws<OverflowException>(() => NumberBaseHelper<byte>.CreateChecked<NativeCULong>(new NativeCULong(0x100)));
-    }
+    public void CreateChecked_ToByte_ExceedingThrows() => Assert.Throws<OverflowException>(() => NumberBaseHelper<byte>.CreateChecked<NativeCULong>(new NativeCULong(0x100)));
 
     [Fact]
-    public void CreateChecked_ToSbyte_FitsRoundTrips()
-    {
-        Assert.Equal((sbyte)0x7F, NumberBaseHelper<sbyte>.CreateChecked<NativeCULong>(new NativeCULong(0x7Fu)));
-    }
+    public void CreateChecked_ToSbyte_FitsRoundTrips() => Assert.Equal((sbyte)0x7F, NumberBaseHelper<sbyte>.CreateChecked<NativeCULong>(new NativeCULong(0x7Fu)));
 
     [Fact]
-    public void CreateChecked_ToSbyte_ExceedingThrows()
-    {
-        Assert.Throws<OverflowException>(() => NumberBaseHelper<sbyte>.CreateChecked<NativeCULong>(new NativeCULong(0x80u)));
-    }
+    public void CreateChecked_ToSbyte_ExceedingThrows() => Assert.Throws<OverflowException>(() => NumberBaseHelper<sbyte>.CreateChecked<NativeCULong>(new NativeCULong(0x80u)));
 
     [Fact]
-    public void CreateChecked_ToShort_FitsRoundTrips()
-    {
-        Assert.Equal((short)0x7FFF, NumberBaseHelper<short>.CreateChecked<NativeCULong>(new NativeCULong(0x7FFFu)));
-    }
+    public void CreateChecked_ToShort_FitsRoundTrips() => Assert.Equal((short)0x7FFF, NumberBaseHelper<short>.CreateChecked<NativeCULong>(new NativeCULong(0x7FFFu)));
 
     [Fact]
-    public void CreateChecked_ToShort_ExceedingThrows()
-    {
-        Assert.Throws<OverflowException>(() => NumberBaseHelper<short>.CreateChecked<NativeCULong>(new NativeCULong(0x8000u)));
-    }
+    public void CreateChecked_ToShort_ExceedingThrows() => Assert.Throws<OverflowException>(() => NumberBaseHelper<short>.CreateChecked<NativeCULong>(new NativeCULong(0x8000u)));
 
     [Fact]
-    public void CreateChecked_ToInt_PositiveRoundTrips()
-    {
-        Assert.Equal(0x7FFFFFFF, NumberBaseHelper<int>.CreateChecked<NativeCULong>(new NativeCULong(0x7FFFFFFF)));
-    }
+    public void CreateChecked_ToInt_PositiveRoundTrips() => Assert.Equal(0x7FFFFFFF, NumberBaseHelper<int>.CreateChecked<NativeCULong>(new NativeCULong(0x7FFFFFFF)));
+
+    // Value exceeding int.MaxValue must throw on every platform (uint can hold
+    // 0x80000000 even on 32-bit storage).
+    [Fact]
+    public void CreateChecked_ToInt_LargeValueThrows() => Assert.Throws<OverflowException>(() => NumberBaseHelper<int>.CreateChecked<NativeCULong>(new NativeCULong(0x80000000u)));
 
     [Fact]
-    public void CreateChecked_ToInt_LargeValueThrows()
-    {
-        // Value exceeding int.MaxValue must throw on every platform (uint can hold
-        // 0x80000000 even on 32-bit storage).
-        Assert.Throws<OverflowException>(() => NumberBaseHelper<int>.CreateChecked<NativeCULong>(new NativeCULong(0x80000000u)));
-    }
-
-    [Fact]
-    public void CreateChecked_ToLong_FitsRoundTrips()
-    {
-        Assert.Equal(0x7FFFFFFFL, NumberBaseHelper<long>.CreateChecked<NativeCULong>(new NativeCULong(0x7FFFFFFFu)));
-    }
+    public void CreateChecked_ToLong_FitsRoundTrips() => Assert.Equal(0x7FFFFFFFL, NumberBaseHelper<long>.CreateChecked<NativeCULong>(new NativeCULong(0x7FFFFFFFu)));
 
     [ConditionalFact(typeof(PlatformLayout), nameof(PlatformLayout.Has64BitStorage))]
     public void CreateChecked_ToLong_ExceedingThrowsOn64BitStorage()
@@ -83,72 +56,42 @@ public partial class NativeCULongTests
     }
 
     [Fact]
-    public void CreateChecked_ToNint_FitsRoundTrips()
-    {
-        Assert.Equal((nint)42, NumberBaseHelper<nint>.CreateChecked<NativeCULong>(new NativeCULong(42u)));
-    }
+    public void CreateChecked_ToNint_FitsRoundTrips() => Assert.Equal((nint)42, NumberBaseHelper<nint>.CreateChecked<NativeCULong>(new NativeCULong(42u)));
 
+    // Int128 strictly contains NativeCULong's range; always exact.
     [Fact]
-    public void CreateChecked_ToInt128_RoundTrips()
-    {
-        // Int128 strictly contains NativeCULong's range; always exact.
-        Assert.Equal((Int128)0xFFFFFFFFu, NumberBaseHelper<Int128>.CreateChecked<NativeCULong>(new NativeCULong(0xFFFFFFFFu)));
-    }
+    public void CreateChecked_ToInt128_RoundTrips() => Assert.Equal((Int128)0xFFFFFFFFu, NumberBaseHelper<Int128>.CreateChecked<NativeCULong>(new NativeCULong(0xFFFFFFFFu)));
 
     //
     // CreateSaturating: clamps to TOther's bounds on out-of-range.
     //
 
     [Fact]
-    public void CreateSaturating_ToByte_ExceedingSaturatesToFF()
-    {
-        Assert.Equal((byte)0xFF, NumberBaseHelper<byte>.CreateSaturating<NativeCULong>(new NativeCULong(0x100)));
-    }
+    public void CreateSaturating_ToByte_ExceedingSaturatesToFF() => Assert.Equal((byte)0xFF, NumberBaseHelper<byte>.CreateSaturating<NativeCULong>(new NativeCULong(0x100)));
 
     [Fact]
-    public void CreateSaturating_ToSbyte_FitsRoundTrips()
-    {
-        Assert.Equal((sbyte)0x7F, NumberBaseHelper<sbyte>.CreateSaturating<NativeCULong>(new NativeCULong(0x7Fu)));
-    }
+    public void CreateSaturating_ToSbyte_FitsRoundTrips() => Assert.Equal((sbyte)0x7F, NumberBaseHelper<sbyte>.CreateSaturating<NativeCULong>(new NativeCULong(0x7Fu)));
 
     [Fact]
-    public void CreateSaturating_ToSbyte_ExceedingSaturatesToMax()
-    {
-        Assert.Equal(sbyte.MaxValue, NumberBaseHelper<sbyte>.CreateSaturating<NativeCULong>(new NativeCULong(0x80u)));
-    }
+    public void CreateSaturating_ToSbyte_ExceedingSaturatesToMax() => Assert.Equal(sbyte.MaxValue, NumberBaseHelper<sbyte>.CreateSaturating<NativeCULong>(new NativeCULong(0x80u)));
 
     [Fact]
-    public void CreateSaturating_ToShort_FitsRoundTrips()
-    {
-        Assert.Equal((short)0x7FFF, NumberBaseHelper<short>.CreateSaturating<NativeCULong>(new NativeCULong(0x7FFFu)));
-    }
+    public void CreateSaturating_ToShort_FitsRoundTrips() => Assert.Equal((short)0x7FFF, NumberBaseHelper<short>.CreateSaturating<NativeCULong>(new NativeCULong(0x7FFFu)));
 
     [Fact]
-    public void CreateSaturating_ToShort_ExceedingSaturatesToMax()
-    {
-        Assert.Equal(short.MaxValue, NumberBaseHelper<short>.CreateSaturating<NativeCULong>(new NativeCULong(0x8000u)));
-    }
+    public void CreateSaturating_ToShort_ExceedingSaturatesToMax() => Assert.Equal(short.MaxValue, NumberBaseHelper<short>.CreateSaturating<NativeCULong>(new NativeCULong(0x8000u)));
+
+    // Branch closure for the `v > int.MaxValue ? int.MaxValue : (int)v` ternary —
+    // the existing ExceedingSaturatesToMax test covers the true branch; this covers
+    // the value-fits-no-saturation branch.
+    [Fact]
+    public void CreateSaturating_ToInt_WithinRange_RoundTrips() => Assert.Equal(0x7FFFFFFE, NumberBaseHelper<int>.CreateSaturating<NativeCULong>(new NativeCULong(0x7FFFFFFEu)));
 
     [Fact]
-    public void CreateSaturating_ToInt_WithinRange_RoundTrips()
-    {
-        // Branch closure for the `v > int.MaxValue ? int.MaxValue : (int)v` ternary —
-        // the existing ExceedingSaturatesToMax test covers the true branch; this covers
-        // the value-fits-no-saturation branch.
-        Assert.Equal(0x7FFFFFFE, NumberBaseHelper<int>.CreateSaturating<NativeCULong>(new NativeCULong(0x7FFFFFFEu)));
-    }
+    public void CreateSaturating_ToInt_LargeValueSaturatesToMax() => Assert.Equal(int.MaxValue, NumberBaseHelper<int>.CreateSaturating<NativeCULong>(new NativeCULong(0x80000000u)));
 
     [Fact]
-    public void CreateSaturating_ToInt_LargeValueSaturatesToMax()
-    {
-        Assert.Equal(int.MaxValue, NumberBaseHelper<int>.CreateSaturating<NativeCULong>(new NativeCULong(0x80000000u)));
-    }
-
-    [Fact]
-    public void CreateSaturating_ToLong_FitsRoundTrips()
-    {
-        Assert.Equal(0x7FFFFFFFL, NumberBaseHelper<long>.CreateSaturating<NativeCULong>(new NativeCULong(0x7FFFFFFFu)));
-    }
+    public void CreateSaturating_ToLong_FitsRoundTrips() => Assert.Equal(0x7FFFFFFFL, NumberBaseHelper<long>.CreateSaturating<NativeCULong>(new NativeCULong(0x7FFFFFFFu)));
 
     [ConditionalFact(typeof(PlatformLayout), nameof(PlatformLayout.Has64BitStorage))]
     public void CreateSaturating_ToLong_ExceedingSaturatesToMaxOn64BitStorage()
@@ -160,63 +103,36 @@ public partial class NativeCULongTests
     }
 
     [Fact]
-    public void CreateSaturating_ToNint_FitsRoundTrips()
-    {
-        Assert.Equal((nint)42, NumberBaseHelper<nint>.CreateSaturating<NativeCULong>(new NativeCULong(42u)));
-    }
+    public void CreateSaturating_ToNint_FitsRoundTrips() => Assert.Equal((nint)42, NumberBaseHelper<nint>.CreateSaturating<NativeCULong>(new NativeCULong(42u)));
 
     [Fact]
-    public void CreateSaturating_ToInt128_RoundTrips()
-    {
-        Assert.Equal((Int128)0xFFFFFFFFu, NumberBaseHelper<Int128>.CreateSaturating<NativeCULong>(new NativeCULong(0xFFFFFFFFu)));
-    }
+    public void CreateSaturating_ToInt128_RoundTrips() => Assert.Equal((Int128)0xFFFFFFFFu, NumberBaseHelper<Int128>.CreateSaturating<NativeCULong>(new NativeCULong(0xFFFFFFFFu)));
 
     //
     // CreateTruncating: wraps to TOther's low-order bits.
     //
 
     [Fact]
-    public void CreateTruncating_ToByte_WrapsToLowOctet()
-    {
-        Assert.Equal((byte)0x42, NumberBaseHelper<byte>.CreateTruncating<NativeCULong>(new NativeCULong(0x12345642)));
-    }
+    public void CreateTruncating_ToByte_WrapsToLowOctet() => Assert.Equal((byte)0x42, NumberBaseHelper<byte>.CreateTruncating<NativeCULong>(new NativeCULong(0x12345642)));
 
     [Theory]
     [InlineData(0x142u, (byte)0x42)] // sbyte = unchecked((sbyte)0x42) = 0x42
     [InlineData(0x180u, (byte)0x80)] // sbyte = unchecked((sbyte)0x80) = -128
-    public void CreateTruncating_ToSbyte_WrapsToLowOctet(uint source, byte expectedAsByte)
-    {
-        Assert.Equal(unchecked((sbyte)expectedAsByte), NumberBaseHelper<sbyte>.CreateTruncating<NativeCULong>(new NativeCULong(source)));
-    }
+    public void CreateTruncating_ToSbyte_WrapsToLowOctet(uint source, byte expectedAsByte) => Assert.Equal(unchecked((sbyte)expectedAsByte), NumberBaseHelper<sbyte>.CreateTruncating<NativeCULong>(new NativeCULong(source)));
 
     [Fact]
-    public void CreateTruncating_ToShort_WrapsToLowWord()
-    {
-        Assert.Equal(unchecked((short)0x5678), NumberBaseHelper<short>.CreateTruncating<NativeCULong>(new NativeCULong(0x12345678u)));
-    }
+    public void CreateTruncating_ToShort_WrapsToLowWord() => Assert.Equal(unchecked((short)0x5678), NumberBaseHelper<short>.CreateTruncating<NativeCULong>(new NativeCULong(0x12345678u)));
+
+    // 0x80000000 truncated and reinterpreted as int = int.MinValue.
+    [Fact]
+    public void CreateTruncating_ToInt_LargeValueWrapsToLow32Bits() => Assert.Equal(int.MinValue, NumberBaseHelper<int>.CreateTruncating<NativeCULong>(new NativeCULong(0x80000000u)));
 
     [Fact]
-    public void CreateTruncating_ToInt_LargeValueWrapsToLow32Bits()
-    {
-        // 0x80000000 truncated and reinterpreted as int = int.MinValue.
-        Assert.Equal(int.MinValue, NumberBaseHelper<int>.CreateTruncating<NativeCULong>(new NativeCULong(0x80000000u)));
-    }
+    public void CreateTruncating_ToLong_RoundTrips() => Assert.Equal(0xFFFFFFFFL, NumberBaseHelper<long>.CreateTruncating<NativeCULong>(new NativeCULong(0xFFFFFFFFu)));
 
     [Fact]
-    public void CreateTruncating_ToLong_RoundTrips()
-    {
-        Assert.Equal(0xFFFFFFFFL, NumberBaseHelper<long>.CreateTruncating<NativeCULong>(new NativeCULong(0xFFFFFFFFu)));
-    }
+    public void CreateTruncating_ToNint_RoundTrips() => Assert.Equal((nint)42, NumberBaseHelper<nint>.CreateTruncating<NativeCULong>(new NativeCULong(42u)));
 
     [Fact]
-    public void CreateTruncating_ToNint_RoundTrips()
-    {
-        Assert.Equal((nint)42, NumberBaseHelper<nint>.CreateTruncating<NativeCULong>(new NativeCULong(42u)));
-    }
-
-    [Fact]
-    public void CreateTruncating_ToInt128_RoundTrips()
-    {
-        Assert.Equal((Int128)0xFFFFFFFFu, NumberBaseHelper<Int128>.CreateTruncating<NativeCULong>(new NativeCULong(0xFFFFFFFFu)));
-    }
+    public void CreateTruncating_ToInt128_RoundTrips() => Assert.Equal((Int128)0xFFFFFFFFu, NumberBaseHelper<Int128>.CreateTruncating<NativeCULong>(new NativeCULong(0xFFFFFFFFu)));
 }

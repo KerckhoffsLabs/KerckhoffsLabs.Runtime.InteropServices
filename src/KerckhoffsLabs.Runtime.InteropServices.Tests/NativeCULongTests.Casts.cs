@@ -29,18 +29,12 @@ public partial class NativeCULongTests
     [Theory]
     [InlineData(0L, 0u)]
     [InlineData(42L, 42u)]
-    public void Cast_FromLong_RoundTrips_ZeroAndPositive(long value, uint expected)
-    {
-        Assert.Equal(expected, (uint)((NativeCULong)value).Value);
-    }
+    public void Cast_FromLong_RoundTrips_ZeroAndPositive(long value, uint expected) => Assert.Equal(expected, (uint)((NativeCULong)value).Value);
 
     [Theory]
     [InlineData(0UL, 0u)]
     [InlineData((ulong)uint.MaxValue, uint.MaxValue)]
-    public void Cast_FromULong_RoundTrips_WithinRange(ulong value, uint expected)
-    {
-        Assert.Equal(expected, (uint)((NativeCULong)value).Value);
-    }
+    public void Cast_FromULong_RoundTrips_WithinRange(ulong value, uint expected) => Assert.Equal(expected, (uint)((NativeCULong)value).Value);
 
     [Fact]
     public void Cast_FromNUint_Identity()

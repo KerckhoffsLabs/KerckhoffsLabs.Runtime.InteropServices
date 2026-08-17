@@ -32,10 +32,7 @@ public partial class NativeCULongTests
     }
 
     [ConditionalFact(typeof(PlatformLayout), nameof(PlatformLayout.NativeCULongConstructorCanOverflow))]
-    public void Ctor_NUInt_OutOfRange()
-    {
-        Assert.Throws<OverflowException>(() => new NativeCULong(unchecked(((nuint)uint.MaxValue) + 1)));
-    }
+    public void Ctor_NUInt_OutOfRange() => Assert.Throws<OverflowException>(() => new NativeCULong(unchecked(((nuint)uint.MaxValue) + 1)));
 
     [ConditionalFact(typeof(PlatformLayout), nameof(PlatformLayout.NativeCULongConstructorCannotOverflow))]
     public void Ctor_NUInt_LargeValue()
@@ -115,10 +112,7 @@ public partial class NativeCULongTests
     }
 
     [Fact]
-    public void MinValueTest()
-    {
-        Assert.Equal(new NativeCULong(0x00000000), NativeCULong.MinValue);
-    }
+    public void MinValueTest() => Assert.Equal(new NativeCULong(0x00000000), NativeCULong.MinValue);
 
     [Fact]
     public void MaxValueTest()

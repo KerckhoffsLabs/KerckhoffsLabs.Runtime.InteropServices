@@ -28,49 +28,28 @@ public partial class NativeCULongTests
     [Theory]
     [InlineData(0, 0x00000000u)]
     [InlineData(int.MaxValue, 0x7FFFFFFFu)]
-    public void CreateChecked_FromInt_PositiveRoundTrips(int value, uint expected)
-    {
-        Assert.Equal(new NativeCULong(expected), NumberBaseHelper<NativeCULong>.CreateChecked<int>(value));
-    }
+    public void CreateChecked_FromInt_PositiveRoundTrips(int value, uint expected) => Assert.Equal(new NativeCULong(expected), NumberBaseHelper<NativeCULong>.CreateChecked<int>(value));
 
     [Fact]
-    public void CreateChecked_FromInt_NegativeThrows()
-    {
-        Assert.Throws<OverflowException>(() => NumberBaseHelper<NativeCULong>.CreateChecked<int>(-1));
-    }
+    public void CreateChecked_FromInt_NegativeThrows() => Assert.Throws<OverflowException>(() => NumberBaseHelper<NativeCULong>.CreateChecked<int>(-1));
+
+    // uint is in NativeCULong's TryConvertFromChecked type table; always exact.
+    [Fact]
+    public void CreateChecked_FromUInt_RoundTrips() => Assert.Equal(new NativeCULong(0xDEADBEEFu), NumberBaseHelper<NativeCULong>.CreateChecked<uint>(0xDEADBEEFu));
 
     [Fact]
-    public void CreateChecked_FromUInt_RoundTrips()
-    {
-        // uint is in NativeCULong's TryConvertFromChecked type table; always exact.
-        Assert.Equal(new NativeCULong(0xDEADBEEFu), NumberBaseHelper<NativeCULong>.CreateChecked<uint>(0xDEADBEEFu));
-    }
-
-    [Fact]
-    public void CreateChecked_FromLong_WithinUInt32Range()
-    {
-        Assert.Equal(new NativeCULong(0xFFFFFFFF), NumberBaseHelper<NativeCULong>.CreateChecked<long>(0xFFFFFFFFL));
-    }
+    public void CreateChecked_FromLong_WithinUInt32Range() => Assert.Equal(new NativeCULong(0xFFFFFFFF), NumberBaseHelper<NativeCULong>.CreateChecked<long>(0xFFFFFFFFL));
 
     [ConditionalFact(typeof(PlatformLayout), nameof(PlatformLayout.Has32BitStorage))]
-    public void CreateChecked_FromLong_ExceedingUInt32MaxThrowsOn32BitStorage()
-    {
-        Assert.Throws<OverflowException>(() => NumberBaseHelper<NativeCULong>.CreateChecked<long>(0x1_0000_0000L));
-    }
+    public void CreateChecked_FromLong_ExceedingUInt32MaxThrowsOn32BitStorage() => Assert.Throws<OverflowException>(() => NumberBaseHelper<NativeCULong>.CreateChecked<long>(0x1_0000_0000L));
 
-    [ConditionalFact(typeof(PlatformLayout), nameof(PlatformLayout.Has64BitStorage))]
-    public void CreateChecked_FromLong_ExceedingUInt32MaxFitsOn64BitStorage()
-    {
 #pragma warning disable CS8778 // intentional 64-bit-storage literal; gated at runtime by Has64BitStorage
-        Assert.Equal(new NativeCULong((nuint)0x1_0000_0000UL), NumberBaseHelper<NativeCULong>.CreateChecked<long>(0x1_0000_0000L));
+    [ConditionalFact(typeof(PlatformLayout), nameof(PlatformLayout.Has64BitStorage))]
+    public void CreateChecked_FromLong_ExceedingUInt32MaxFitsOn64BitStorage() => Assert.Equal(new NativeCULong((nuint)0x1_0000_0000UL), NumberBaseHelper<NativeCULong>.CreateChecked<long>(0x1_0000_0000L));
 #pragma warning restore CS8778
-    }
 
     [Fact]
-    public void CreateChecked_FromLong_NegativeThrows()
-    {
-        Assert.Throws<OverflowException>(() => NumberBaseHelper<NativeCULong>.CreateChecked<long>(-1L));
-    }
+    public void CreateChecked_FromLong_NegativeThrows() => Assert.Throws<OverflowException>(() => NumberBaseHelper<NativeCULong>.CreateChecked<long>(-1L));
 
     [Fact]
     public void CreateChecked_FromUlong_WithinRange_RoundTrips()
@@ -80,10 +59,7 @@ public partial class NativeCULongTests
     }
 
     [ConditionalFact(typeof(PlatformLayout), nameof(PlatformLayout.Has32BitStorage))]
-    public void CreateChecked_FromUlong_ExceedingStorage_ThrowsOn32BitStorage()
-    {
-        Assert.Throws<OverflowException>(() => NumberBaseHelper<NativeCULong>.CreateChecked<ulong>(0x1_0000_0000UL));
-    }
+    public void CreateChecked_FromUlong_ExceedingStorage_ThrowsOn32BitStorage() => Assert.Throws<OverflowException>(() => NumberBaseHelper<NativeCULong>.CreateChecked<ulong>(0x1_0000_0000UL));
 
     [Fact]
     public void CreateChecked_FromNUint_Identity()
@@ -97,78 +73,45 @@ public partial class NativeCULongTests
     //
 
     [Fact]
-    public void CreateSaturating_FromInt_NegativeSaturatesToMin()
-    {
-        Assert.Equal(NativeCULong.MinValue, NumberBaseHelper<NativeCULong>.CreateSaturating<int>(-1));
-    }
+    public void CreateSaturating_FromInt_NegativeSaturatesToMin() => Assert.Equal(NativeCULong.MinValue, NumberBaseHelper<NativeCULong>.CreateSaturating<int>(-1));
 
     [Fact]
-    public void CreateSaturating_FromInt_PositiveRoundTrips()
-    {
-        Assert.Equal(new NativeCULong(0x7FFFFFFF), NumberBaseHelper<NativeCULong>.CreateSaturating<int>(int.MaxValue));
-    }
+    public void CreateSaturating_FromInt_PositiveRoundTrips() => Assert.Equal(new NativeCULong(0x7FFFFFFF), NumberBaseHelper<NativeCULong>.CreateSaturating<int>(int.MaxValue));
 
     [Fact]
-    public void CreateSaturating_FromUlong_WithinRange_RoundTrips()
-    {
-        Assert.Equal(new NativeCULong(0xFFFFFFFFu), NumberBaseHelper<NativeCULong>.CreateSaturating<ulong>(0xFFFFFFFFUL));
-    }
+    public void CreateSaturating_FromUlong_WithinRange_RoundTrips() => Assert.Equal(new NativeCULong(0xFFFFFFFFu), NumberBaseHelper<NativeCULong>.CreateSaturating<ulong>(0xFFFFFFFFUL));
 
     [ConditionalFact(typeof(PlatformLayout), nameof(PlatformLayout.Has32BitStorage))]
-    public void CreateSaturating_FromUlong_ExceedingStorage_SaturatesToMaxOn32BitStorage()
-    {
-        Assert.Equal(NativeCULong.MaxValue, NumberBaseHelper<NativeCULong>.CreateSaturating<ulong>(0x1_0000_0000UL));
-    }
+    public void CreateSaturating_FromUlong_ExceedingStorage_SaturatesToMaxOn32BitStorage() => Assert.Equal(NativeCULong.MaxValue, NumberBaseHelper<NativeCULong>.CreateSaturating<ulong>(0x1_0000_0000UL));
 
     [ConditionalFact(typeof(PlatformLayout), nameof(PlatformLayout.Has32BitStorage))]
-    public void CreateSaturating_FromLong_ExceedingUInt32MaxSaturatesOn32BitStorage()
-    {
-        Assert.Equal(NativeCULong.MaxValue, NumberBaseHelper<NativeCULong>.CreateSaturating<long>(0x1_0000_0000L));
-    }
+    public void CreateSaturating_FromLong_ExceedingUInt32MaxSaturatesOn32BitStorage() => Assert.Equal(NativeCULong.MaxValue, NumberBaseHelper<NativeCULong>.CreateSaturating<long>(0x1_0000_0000L));
 
     [Fact]
-    public void CreateSaturating_FromLong_NegativeSaturatesToMin()
-    {
-        Assert.Equal(NativeCULong.MinValue, NumberBaseHelper<NativeCULong>.CreateSaturating<long>(-1L));
-    }
+    public void CreateSaturating_FromLong_NegativeSaturatesToMin() => Assert.Equal(NativeCULong.MinValue, NumberBaseHelper<NativeCULong>.CreateSaturating<long>(-1L));
 
     //
     // CreateTruncating: wraps on out-of-range (low-order bits preserved).
     //
 
+    // -1 has every bit set in two's complement; truncating to NativeCULong's
+    // storage width yields the all-ones value, which is MaxValue.
     [Fact]
-    public void CreateTruncating_FromInt_NegativeWraps()
-    {
-        // -1 has every bit set in two's complement; truncating to NativeCULong's
-        // storage width yields the all-ones value, which is MaxValue.
-        Assert.Equal(NativeCULong.MaxValue, NumberBaseHelper<NativeCULong>.CreateTruncating<int>(-1));
-    }
+    public void CreateTruncating_FromInt_NegativeWraps() => Assert.Equal(NativeCULong.MaxValue, NumberBaseHelper<NativeCULong>.CreateTruncating<int>(-1));
+
+    // uint width <= storage width on every platform (4 == 4 on Windows/32-bit, 4 < 8 on
+    // 64-bit Unix); truncation is exact.
+    [Fact]
+    public void CreateTruncating_FromUInt_RoundTrips() => Assert.Equal(new NativeCULong(0xDEADBEEFu), NumberBaseHelper<NativeCULong>.CreateTruncating<uint>(0xDEADBEEFu));
 
     [Fact]
-    public void CreateTruncating_FromUInt_RoundTrips()
-    {
-        // uint width <= storage width on every platform (4 == 4 on Windows/32-bit, 4 < 8 on
-        // 64-bit Unix); truncation is exact.
-        Assert.Equal(new NativeCULong(0xDEADBEEFu), NumberBaseHelper<NativeCULong>.CreateTruncating<uint>(0xDEADBEEFu));
-    }
-
-    [Fact]
-    public void CreateTruncating_FromUlong_RoundTrips()
-    {
-        Assert.Equal(new NativeCULong(0xFFFFFFFFu), NumberBaseHelper<NativeCULong>.CreateTruncating<ulong>(0xFFFFFFFFUL));
-    }
+    public void CreateTruncating_FromUlong_RoundTrips() => Assert.Equal(new NativeCULong(0xFFFFFFFFu), NumberBaseHelper<NativeCULong>.CreateTruncating<ulong>(0xFFFFFFFFUL));
 
     [ConditionalFact(typeof(PlatformLayout), nameof(PlatformLayout.Has32BitStorage))]
-    public void CreateTruncating_FromLong_HighBitsDroppedOn32BitStorage()
-    {
-        Assert.Equal(new NativeCULong(0x00000001), NumberBaseHelper<NativeCULong>.CreateTruncating<long>(0x1_0000_0001L));
-    }
+    public void CreateTruncating_FromLong_HighBitsDroppedOn32BitStorage() => Assert.Equal(new NativeCULong(0x00000001), NumberBaseHelper<NativeCULong>.CreateTruncating<long>(0x1_0000_0001L));
 
     [ConditionalFact(typeof(PlatformLayout), nameof(PlatformLayout.Has32BitStorage))]
-    public void CreateTruncating_FromUlong_HighBitsDroppedOn32BitStorage()
-    {
-        Assert.Equal(new NativeCULong(0x00000001u), NumberBaseHelper<NativeCULong>.CreateTruncating<ulong>(0x1_0000_0001UL));
-    }
+    public void CreateTruncating_FromUlong_HighBitsDroppedOn32BitStorage() => Assert.Equal(new NativeCULong(0x00000001u), NumberBaseHelper<NativeCULong>.CreateTruncating<ulong>(0x1_0000_0001UL));
 
     //
     // Floating-point and decimal source semantics. The smoke matrix at the bottom covers
@@ -181,146 +124,80 @@ public partial class NativeCULongTests
 
     // CreateChecked: truncates the fractional part on in-range values.
     [Fact]
-    public void CreateChecked_FromFloat_TruncatesFractional()
-    {
-        Assert.Equal(new NativeCULong(3u), NumberBaseHelper<NativeCULong>.CreateChecked<float>(3.5f));
-    }
+    public void CreateChecked_FromFloat_TruncatesFractional() => Assert.Equal(new NativeCULong(3u), NumberBaseHelper<NativeCULong>.CreateChecked<float>(3.5f));
 
     [Fact]
-    public void CreateChecked_FromDouble_TruncatesFractional()
-    {
-        Assert.Equal(new NativeCULong(3u), NumberBaseHelper<NativeCULong>.CreateChecked<double>(3.5));
-    }
+    public void CreateChecked_FromDouble_TruncatesFractional() => Assert.Equal(new NativeCULong(3u), NumberBaseHelper<NativeCULong>.CreateChecked<double>(3.5));
 
     [Fact]
-    public void CreateChecked_FromHalf_TruncatesFractional()
-    {
-        Assert.Equal(new NativeCULong(3u), NumberBaseHelper<NativeCULong>.CreateChecked<Half>((Half)3.5));
-    }
+    public void CreateChecked_FromHalf_TruncatesFractional() => Assert.Equal(new NativeCULong(3u), NumberBaseHelper<NativeCULong>.CreateChecked<Half>((Half)3.5));
 
     [Fact]
-    public void CreateChecked_FromDecimal_TruncatesFractional()
-    {
-        Assert.Equal(new NativeCULong(3u), NumberBaseHelper<NativeCULong>.CreateChecked<decimal>(3.5m));
-    }
+    public void CreateChecked_FromDecimal_TruncatesFractional() => Assert.Equal(new NativeCULong(3u), NumberBaseHelper<NativeCULong>.CreateChecked<decimal>(3.5m));
 
     // CreateChecked: throws on NaN or on negatives whose truncated integer is below 0.
     [Fact]
-    public void CreateChecked_FromFloat_NaN_Throws()
-    {
-        Assert.Throws<OverflowException>(() => NumberBaseHelper<NativeCULong>.CreateChecked<float>(float.NaN));
-    }
+    public void CreateChecked_FromFloat_NaN_Throws() => Assert.Throws<OverflowException>(() => NumberBaseHelper<NativeCULong>.CreateChecked<float>(float.NaN));
+
+    // BCL truncates toward zero first, then range-checks: -0.5f truncates to 0 (in
+    // range) and would not throw, so use a value whose truncated integer is below 0.
+    [Fact]
+    public void CreateChecked_FromFloat_Negative_Throws() => Assert.Throws<OverflowException>(() => NumberBaseHelper<NativeCULong>.CreateChecked<float>(-1.5f));
 
     [Fact]
-    public void CreateChecked_FromFloat_Negative_Throws()
-    {
-        // BCL truncates toward zero first, then range-checks: -0.5f truncates to 0 (in
-        // range) and would not throw, so use a value whose truncated integer is below 0.
-        Assert.Throws<OverflowException>(() => NumberBaseHelper<NativeCULong>.CreateChecked<float>(-1.5f));
-    }
+    public void CreateChecked_FromDouble_NaN_Throws() => Assert.Throws<OverflowException>(() => NumberBaseHelper<NativeCULong>.CreateChecked<double>(double.NaN));
 
     [Fact]
-    public void CreateChecked_FromDouble_NaN_Throws()
-    {
-        Assert.Throws<OverflowException>(() => NumberBaseHelper<NativeCULong>.CreateChecked<double>(double.NaN));
-    }
+    public void CreateChecked_FromDouble_Negative_Throws() => Assert.Throws<OverflowException>(() => NumberBaseHelper<NativeCULong>.CreateChecked<double>(-1.5));
 
     [Fact]
-    public void CreateChecked_FromDouble_Negative_Throws()
-    {
-        Assert.Throws<OverflowException>(() => NumberBaseHelper<NativeCULong>.CreateChecked<double>(-1.5));
-    }
+    public void CreateChecked_FromHalf_NaN_Throws() => Assert.Throws<OverflowException>(() => NumberBaseHelper<NativeCULong>.CreateChecked<Half>(Half.NaN));
 
     [Fact]
-    public void CreateChecked_FromHalf_NaN_Throws()
-    {
-        Assert.Throws<OverflowException>(() => NumberBaseHelper<NativeCULong>.CreateChecked<Half>(Half.NaN));
-    }
+    public void CreateChecked_FromHalf_Negative_Throws() => Assert.Throws<OverflowException>(() => NumberBaseHelper<NativeCULong>.CreateChecked<Half>((Half)(-1.5)));
 
+    // decimal has no NaN, so only the negative path applies.
     [Fact]
-    public void CreateChecked_FromHalf_Negative_Throws()
-    {
-        Assert.Throws<OverflowException>(() => NumberBaseHelper<NativeCULong>.CreateChecked<Half>((Half)(-1.5)));
-    }
-
-    [Fact]
-    public void CreateChecked_FromDecimal_Negative_Throws()
-    {
-        // decimal has no NaN, so only the negative path applies.
-        Assert.Throws<OverflowException>(() => NumberBaseHelper<NativeCULong>.CreateChecked<decimal>(-1.5m));
-    }
+    public void CreateChecked_FromDecimal_Negative_Throws() => Assert.Throws<OverflowException>(() => NumberBaseHelper<NativeCULong>.CreateChecked<decimal>(-1.5m));
 
     // CreateSaturating: NaN saturates to MinValue (IEEE convention); negatives saturate
     // to MinValue.
     [Fact]
-    public void CreateSaturating_FromFloat_NaN_SaturatesToMin()
-    {
-        Assert.Equal(NativeCULong.MinValue, NumberBaseHelper<NativeCULong>.CreateSaturating<float>(float.NaN));
-    }
+    public void CreateSaturating_FromFloat_NaN_SaturatesToMin() => Assert.Equal(NativeCULong.MinValue, NumberBaseHelper<NativeCULong>.CreateSaturating<float>(float.NaN));
 
     [Fact]
-    public void CreateSaturating_FromFloat_Negative_SaturatesToMin()
-    {
-        Assert.Equal(NativeCULong.MinValue, NumberBaseHelper<NativeCULong>.CreateSaturating<float>(-1.5f));
-    }
+    public void CreateSaturating_FromFloat_Negative_SaturatesToMin() => Assert.Equal(NativeCULong.MinValue, NumberBaseHelper<NativeCULong>.CreateSaturating<float>(-1.5f));
 
     [Fact]
-    public void CreateSaturating_FromDouble_NaN_SaturatesToMin()
-    {
-        Assert.Equal(NativeCULong.MinValue, NumberBaseHelper<NativeCULong>.CreateSaturating<double>(double.NaN));
-    }
+    public void CreateSaturating_FromDouble_NaN_SaturatesToMin() => Assert.Equal(NativeCULong.MinValue, NumberBaseHelper<NativeCULong>.CreateSaturating<double>(double.NaN));
 
     [Fact]
-    public void CreateSaturating_FromDouble_Negative_SaturatesToMin()
-    {
-        Assert.Equal(NativeCULong.MinValue, NumberBaseHelper<NativeCULong>.CreateSaturating<double>(-1.5));
-    }
+    public void CreateSaturating_FromDouble_Negative_SaturatesToMin() => Assert.Equal(NativeCULong.MinValue, NumberBaseHelper<NativeCULong>.CreateSaturating<double>(-1.5));
 
     [Fact]
-    public void CreateSaturating_FromHalf_NaN_SaturatesToMin()
-    {
-        Assert.Equal(NativeCULong.MinValue, NumberBaseHelper<NativeCULong>.CreateSaturating<Half>(Half.NaN));
-    }
+    public void CreateSaturating_FromHalf_NaN_SaturatesToMin() => Assert.Equal(NativeCULong.MinValue, NumberBaseHelper<NativeCULong>.CreateSaturating<Half>(Half.NaN));
 
     [Fact]
-    public void CreateSaturating_FromHalf_Negative_SaturatesToMin()
-    {
-        Assert.Equal(NativeCULong.MinValue, NumberBaseHelper<NativeCULong>.CreateSaturating<Half>((Half)(-1.5)));
-    }
+    public void CreateSaturating_FromHalf_Negative_SaturatesToMin() => Assert.Equal(NativeCULong.MinValue, NumberBaseHelper<NativeCULong>.CreateSaturating<Half>((Half)(-1.5)));
 
+    // decimal has no NaN, so only the negative path applies.
     [Fact]
-    public void CreateSaturating_FromDecimal_Negative_SaturatesToMin()
-    {
-        // decimal has no NaN, so only the negative path applies.
-        Assert.Equal(NativeCULong.MinValue, NumberBaseHelper<NativeCULong>.CreateSaturating<decimal>(-1.5m));
-    }
+    public void CreateSaturating_FromDecimal_Negative_SaturatesToMin() => Assert.Equal(NativeCULong.MinValue, NumberBaseHelper<NativeCULong>.CreateSaturating<decimal>(-1.5m));
 
     // CreateTruncating: truncates the fractional part on in-range values. (NaN/negative
     // handling for Truncating is implementation-defined per IEEE; pin only the in-range
     // truncation behavior, which is the well-defined common case.)
     [Fact]
-    public void CreateTruncating_FromFloat_TruncatesFractional()
-    {
-        Assert.Equal(new NativeCULong(3u), NumberBaseHelper<NativeCULong>.CreateTruncating<float>(3.5f));
-    }
+    public void CreateTruncating_FromFloat_TruncatesFractional() => Assert.Equal(new NativeCULong(3u), NumberBaseHelper<NativeCULong>.CreateTruncating<float>(3.5f));
 
     [Fact]
-    public void CreateTruncating_FromDouble_TruncatesFractional()
-    {
-        Assert.Equal(new NativeCULong(3u), NumberBaseHelper<NativeCULong>.CreateTruncating<double>(3.5));
-    }
+    public void CreateTruncating_FromDouble_TruncatesFractional() => Assert.Equal(new NativeCULong(3u), NumberBaseHelper<NativeCULong>.CreateTruncating<double>(3.5));
 
     [Fact]
-    public void CreateTruncating_FromHalf_TruncatesFractional()
-    {
-        Assert.Equal(new NativeCULong(3u), NumberBaseHelper<NativeCULong>.CreateTruncating<Half>((Half)3.5));
-    }
+    public void CreateTruncating_FromHalf_TruncatesFractional() => Assert.Equal(new NativeCULong(3u), NumberBaseHelper<NativeCULong>.CreateTruncating<Half>((Half)3.5));
 
     [Fact]
-    public void CreateTruncating_FromDecimal_TruncatesFractional()
-    {
-        Assert.Equal(new NativeCULong(3u), NumberBaseHelper<NativeCULong>.CreateTruncating<decimal>(3.5m));
-    }
+    public void CreateTruncating_FromDecimal_TruncatesFractional() => Assert.Equal(new NativeCULong(3u), NumberBaseHelper<NativeCULong>.CreateTruncating<decimal>(3.5m));
 
     //
     // Identity shortcut: CreateXxx<NativeCULong>(value) hits the typeof(TOther) ==
@@ -357,22 +234,13 @@ public partial class NativeCULongTests
     //
 
     [Fact]
-    public void CreateChecked_UnsupportedSource_Throws()
-    {
-        Assert.Throws<NotSupportedException>(() => NumberBaseHelper<NativeCULong>.CreateChecked<Complex>(default));
-    }
+    public void CreateChecked_UnsupportedSource_Throws() => Assert.Throws<NotSupportedException>(() => NumberBaseHelper<NativeCULong>.CreateChecked<Complex>(default));
 
     [Fact]
-    public void CreateSaturating_UnsupportedSource_Throws()
-    {
-        Assert.Throws<NotSupportedException>(() => NumberBaseHelper<NativeCULong>.CreateSaturating<Complex>(default));
-    }
+    public void CreateSaturating_UnsupportedSource_Throws() => Assert.Throws<NotSupportedException>(() => NumberBaseHelper<NativeCULong>.CreateSaturating<Complex>(default));
 
     [Fact]
-    public void CreateTruncating_UnsupportedSource_Throws()
-    {
-        Assert.Throws<NotSupportedException>(() => NumberBaseHelper<NativeCULong>.CreateTruncating<Complex>(default));
-    }
+    public void CreateTruncating_UnsupportedSource_Throws() => Assert.Throws<NotSupportedException>(() => NumberBaseHelper<NativeCULong>.CreateTruncating<Complex>(default));
 
     //
     // From-table membership smoke matrix: every recognized source type, every direction.
