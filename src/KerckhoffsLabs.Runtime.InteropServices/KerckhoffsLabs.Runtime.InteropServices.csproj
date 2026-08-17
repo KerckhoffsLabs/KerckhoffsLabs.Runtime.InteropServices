@@ -62,7 +62,14 @@
 
   <ItemGroup>
     <None Include="../../README.md" Pack="true" PackagePath="\" />
-    <None Include="../../docs/images/icon.png" Pack="true" PackagePath="\" />
+    <!-- SonarQubeExclude: the SonarScanner for .NET builds its file list from the MSBuild item
+         groups, and @(None) is one of them, so this packed binary lands in FilesToAnalyze.txt.
+         Sonar's XML sensor then sniffs every unknown-language file for an XML prolog, reads the
+         PNG's bytes as UTF-8 and reports "problems with file encoding in the source code".
+         The metadata drops the file from the scan; Pack is unaffected. -->
+    <None Include="../../docs/images/icon.png" Pack="true" PackagePath="\">
+      <SonarQubeExclude>true</SonarQubeExclude>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
