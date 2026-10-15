@@ -55,7 +55,8 @@ jobs:
       # githubactions:S7637 wants every third-party `uses:` pinned to a commit SHA inline. The
       # workflows are pinned by .github/workflows/actions.lock instead, which Actions enforces at
       # run time (transitive dependencies included); Sonar does not read the lockfile, so it
-      # flags every tag ref. Ignored for workflow files only; `gh actions-lock --verify` is the check.
+      # flags every tag ref. Ignored for workflow files only: the organization's "Require lockfile"
+      # Actions policy blocks any workflow whose dependencies are not in the lockfile.
       - name: Begin analysis
         run: >
           dotnet sonarscanner begin
