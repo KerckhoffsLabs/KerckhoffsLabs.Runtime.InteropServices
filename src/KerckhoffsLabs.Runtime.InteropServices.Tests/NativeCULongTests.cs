@@ -60,15 +60,15 @@ public partial class NativeCULongTests
         { NativeCULong.MaxValue, new NativeCULong(1), false },
     };
 
-    // xUnit1044/1045: neither NativeCULong nor the heterogeneous object column is
-    // xUnit-serializable, so Test Explorer groups these rows instead of enumerating them
-    // individually. That is purely cosmetic — every row still runs — and teaching the
-    // production NativeCULong type IXunitSerializable solely for the runner is not warranted.
-#pragma warning disable xUnit1044, xUnit1045
+    // xUnit1045: the heterogeneous object column is not xUnit-serializable, so Test Explorer
+    // groups these rows instead of enumerating them individually. That is purely cosmetic —
+    // every row still runs. (NativeCULong itself is serializable: xunit.v3 handles any type
+    // that is both IFormattable and IParsable<T>, which IBinaryInteger<T> implies.)
+#pragma warning disable xUnit1045
     [Theory]
     [MemberData(nameof(EqualsData))]
     public void EqualsTest(NativeCULong value, object obj, bool expected)
-#pragma warning restore xUnit1044, xUnit1045
+#pragma warning restore xUnit1045
     {
         if (obj is NativeCULong other)
         {
@@ -105,9 +105,7 @@ public partial class NativeCULongTests
     public unsafe void Size()
     {
         int size = Has32BitStorage ? 4 : 8;
-#pragma warning disable xUnit2000 // The value under test here is the sizeof expression
         Assert.Equal(size, sizeof(NativeCULong));
-#pragma warning restore xUnit2000
         Assert.Equal(size, Marshal.SizeOf<NativeCULong>());
     }
 
