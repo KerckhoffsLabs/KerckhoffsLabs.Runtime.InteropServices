@@ -107,7 +107,7 @@ public partial class NativeCULongTests
         }
     }
 
-    [ConditionalFact(typeof(PlatformLayout), nameof(PlatformLayout.Has64BitStorage))]
+    [Fact(Skip = "Requires 64-bit NativeCULong storage.", SkipUnless = nameof(PlatformLayout.Has64BitStorage), SkipType = typeof(PlatformLayout))]
     public void Cast_ToInt_ThrowsOnUnix64WhenValueExceedsIntRange()
     {
         // On 64-bit Unix, NativeCULong is backed by nuint (64-bit), so it can hold
@@ -119,7 +119,7 @@ public partial class NativeCULongTests
         });
     }
 
-    [ConditionalFact(typeof(PlatformLayout), nameof(PlatformLayout.Has64BitStorage))]
+    [Fact(Skip = "Requires 64-bit NativeCULong storage.", SkipUnless = nameof(PlatformLayout.Has64BitStorage), SkipType = typeof(PlatformLayout))]
     public void Cast_ToInt_WrapsOnUnix64InUncheckedBlock()
     {
         NativeCULong tooBig = new((nuint)((long)int.MaxValue + 1));
@@ -199,7 +199,7 @@ public partial class NativeCULongTests
         }
     }
 
-    [ConditionalFact(typeof(PlatformLayout), nameof(PlatformLayout.Has32BitStorage))]
+    [Fact(Skip = "Requires 32-bit NativeCULong storage.", SkipUnless = nameof(PlatformLayout.Has32BitStorage), SkipType = typeof(PlatformLayout))]
     public void Cast_FromULong_Plain_HighBitsTruncate_On32BitStorage()
     {
         unchecked
@@ -212,7 +212,7 @@ public partial class NativeCULongTests
         }
     }
 
-    [ConditionalFact(typeof(PlatformLayout), nameof(PlatformLayout.Has64BitStorage))]
+    [Fact(Skip = "Requires 64-bit NativeCULong storage.", SkipUnless = nameof(PlatformLayout.Has64BitStorage), SkipType = typeof(PlatformLayout))]
     public void Cast_ToUInt_Plain_TruncatesOn64BitStorage_InsideUncheckedBlock()
     {
         NativeCULong tooBig = new(unchecked((nuint)((ulong)uint.MaxValue + 1UL)));
@@ -224,7 +224,7 @@ public partial class NativeCULongTests
         }
     }
 
-    [ConditionalFact(typeof(PlatformLayout), nameof(PlatformLayout.Has64BitStorage))]
+    [Fact(Skip = "Requires 64-bit NativeCULong storage.", SkipUnless = nameof(PlatformLayout.Has64BitStorage), SkipType = typeof(PlatformLayout))]
     public void Cast_ToLong_Plain_WrapsOn64BitStorage_InsideUncheckedBlock()
     {
         // Value > long.MaxValue: top bit set in 64-bit storage; plain cast reinterprets as negative.

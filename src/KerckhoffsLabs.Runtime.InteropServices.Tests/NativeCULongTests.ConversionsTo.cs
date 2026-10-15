@@ -45,7 +45,7 @@ public partial class NativeCULongTests
     [Fact]
     public void CreateChecked_ToLong_FitsRoundTrips() => Assert.Equal(0x7FFFFFFFL, NumberBaseHelper<long>.CreateChecked<NativeCULong>(new NativeCULong(0x7FFFFFFFu)));
 
-    [ConditionalFact(typeof(PlatformLayout), nameof(PlatformLayout.Has64BitStorage))]
+    [Fact(Skip = "Requires 64-bit NativeCULong storage.", SkipUnless = nameof(PlatformLayout.Has64BitStorage), SkipType = typeof(PlatformLayout))]
     public void CreateChecked_ToLong_ExceedingThrowsOn64BitStorage()
     {
         // Only reachable on 64-bit storage — uint storage can never exceed long.MaxValue.
@@ -93,7 +93,7 @@ public partial class NativeCULongTests
     [Fact]
     public void CreateSaturating_ToLong_FitsRoundTrips() => Assert.Equal(0x7FFFFFFFL, NumberBaseHelper<long>.CreateSaturating<NativeCULong>(new NativeCULong(0x7FFFFFFFu)));
 
-    [ConditionalFact(typeof(PlatformLayout), nameof(PlatformLayout.Has64BitStorage))]
+    [Fact(Skip = "Requires 64-bit NativeCULong storage.", SkipUnless = nameof(PlatformLayout.Has64BitStorage), SkipType = typeof(PlatformLayout))]
     public void CreateSaturating_ToLong_ExceedingSaturatesToMaxOn64BitStorage()
     {
 #pragma warning disable CS8778
