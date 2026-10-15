@@ -93,47 +93,64 @@ public readonly struct NativeCULong
     // int.CreateChecked(nativeCULong) work via INumberBase&lt;T&gt;.
 
     /// <summary>Converts an <see cref="int"/> to a <see cref="NativeCULong"/>. Negative values wrap silently; the paired <c>checked</c> operator throws.</summary>
+    /// <param name="value">The value to convert.</param>
     public static explicit operator NativeCULong(int value) => FromNative(unchecked((NativeType)value));
     /// <summary>Converts a <see cref="uint"/> to a <see cref="NativeCULong"/>. Always exact; widens to <see cref="nuint"/> storage on Unix.</summary>
+    /// <param name="value">The value to convert.</param>
     public static explicit operator NativeCULong(uint value) => FromNative(value);
     /// <summary>Converts a <see cref="long"/> to a <see cref="NativeCULong"/>. Out-of-range values wrap silently; the paired <c>checked</c> operator throws.</summary>
+    /// <param name="value">The value to convert.</param>
     public static explicit operator NativeCULong(long value) => FromNative(unchecked((NativeType)value));
     /// <summary>Converts a <see cref="ulong"/> to a <see cref="NativeCULong"/>. On Windows (32-bit storage), values above <see cref="uint.MaxValue"/> wrap silently; the paired <c>checked</c> operator throws. On Unix (64-bit storage), always exact.</summary>
+    /// <param name="value">The value to convert.</param>
     public static explicit operator NativeCULong(ulong value) => FromNative(unchecked((NativeType)value));
     /// <summary>Converts an <see cref="nuint"/> to a <see cref="NativeCULong"/>. On Windows (32-bit storage), values above <see cref="uint.MaxValue"/> wrap silently. On Unix (64-bit storage), always exact.</summary>
+    /// <param name="value">The value to convert.</param>
     [SuppressMessage("Minor Code Smell", "S1905:Redundant casts should not be used",
         Justification = "(NativeType)value is an identity cast in the nuint build and a required nuint->uint narrowing in the WINDOWS build. The scanner flags it in whichever configuration it compiles as the identity form, but the cast is mandatory in the other, so it cannot be removed.")]
     public static explicit operator NativeCULong(nuint value) => FromNative(unchecked((NativeType)value));
 
     /// <summary>Converts an <see cref="int"/> to a <see cref="NativeCULong"/>. Throws <see cref="System.OverflowException"/> on negative values.</summary>
+    /// <param name="value">The value to convert.</param>
     public static explicit operator checked NativeCULong(int value) => new(checked((uint)value));
     /// <summary>Converts a <see cref="long"/> to a <see cref="NativeCULong"/>. Throws <see cref="System.OverflowException"/> on out-of-range values.</summary>
+    /// <param name="value">The value to convert.</param>
     public static explicit operator checked NativeCULong(long value) => new(checked((nuint)value));
     /// <summary>Converts a <see cref="ulong"/> to a <see cref="NativeCULong"/>. On Windows (32-bit storage), throws <see cref="System.OverflowException"/> on values above <see cref="uint.MaxValue"/>. On Unix (64-bit storage), always succeeds.</summary>
+    /// <param name="value">The value to convert.</param>
     public static explicit operator checked NativeCULong(ulong value) => new(checked((nuint)value));
 
     /// <summary>Converts a <see cref="NativeCULong"/> to an <see cref="int"/>. Values above <see cref="int.MaxValue"/> wrap to negative silently; the paired <c>checked</c> operator throws.</summary>
+    /// <param name="value">The value to convert.</param>
     public static explicit operator int(NativeCULong value) => unchecked((int)value._value);
     /// <summary>Converts a <see cref="NativeCULong"/> to a <see cref="uint"/>. On Unix (64-bit storage), values above <see cref="uint.MaxValue"/> truncate silently; the paired <c>checked</c> operator throws. On Windows (32-bit storage), always exact.</summary>
+    /// <param name="value">The value to convert.</param>
     [SuppressMessage("Minor Code Smell", "S1905:Redundant casts should not be used",
         Justification = "value._value is NativeType: nuint in the default build (so (uint) is a required narrowing) and uint in the WINDOWS build (where the cast is an identity). The cast is mandatory in one of the two builds, so it cannot be removed.")]
     public static explicit operator uint(NativeCULong value) => unchecked((uint)value._value);
     /// <summary>Converts a <see cref="NativeCULong"/> to a <see cref="long"/>. On Unix (64-bit storage), values above <see cref="long.MaxValue"/> wrap to negative silently; the paired <c>checked</c> operator throws. On Windows (32-bit storage), always exact.</summary>
+    /// <param name="value">The value to convert.</param>
     public static explicit operator long(NativeCULong value) => unchecked((long)value._value);
     /// <summary>Converts a <see cref="NativeCULong"/> to a <see cref="ulong"/>. Always exact.</summary>
+    /// <param name="value">The value to convert.</param>
     public static explicit operator ulong(NativeCULong value) => unchecked((ulong)value._value);
     /// <summary>Converts a <see cref="NativeCULong"/> to an <see cref="nuint"/>. Always exact.</summary>
+    /// <param name="value">The value to convert.</param>
     public static explicit operator nuint(NativeCULong value) => value._value;
 
     /// <summary>Converts a <see cref="NativeCULong"/> to an <see cref="int"/>. Throws <see cref="System.OverflowException"/> on values above <see cref="int.MaxValue"/>.</summary>
+    /// <param name="value">The value to convert.</param>
     public static explicit operator checked int(NativeCULong value) => checked((int)value._value);
     /// <summary>Converts a <see cref="NativeCULong"/> to a <see cref="uint"/>. On Unix (64-bit storage), throws <see cref="System.OverflowException"/> on values above <see cref="uint.MaxValue"/>. On Windows (32-bit storage), always succeeds.</summary>
+    /// <param name="value">The value to convert.</param>
     [SuppressMessage("Minor Code Smell", "S1905:Redundant casts should not be used",
         Justification = "value._value is NativeType: nuint in the default build (so (uint) is a required narrowing) and uint in the WINDOWS build (where the cast is an identity). The cast is mandatory in one of the two builds, so it cannot be removed.")]
     public static explicit operator checked uint(NativeCULong value) => checked((uint)value._value);
     /// <summary>Converts a <see cref="NativeCULong"/> to a <see cref="long"/>. On Unix (64-bit storage), throws <see cref="System.OverflowException"/> on values above <see cref="long.MaxValue"/>. On Windows (32-bit storage), always succeeds.</summary>
+    /// <param name="value">The value to convert.</param>
     public static explicit operator checked long(NativeCULong value) => checked((long)value._value);
     /// <summary>Converts a <see cref="NativeCULong"/> to a <see cref="ulong"/>. Always succeeds (the conversion is exact on every supported platform).</summary>
+    /// <param name="value">The value to convert.</param>
     public static explicit operator checked ulong(NativeCULong value) => checked((ulong)value._value);
 
     /// <summary>
