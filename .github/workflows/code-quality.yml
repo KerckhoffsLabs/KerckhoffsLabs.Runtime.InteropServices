@@ -24,18 +24,18 @@ jobs:
     env:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0  # Sonar needs full history for new-code detection and blame
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        uses: actions/setup-dotnet@v6.0.0
         with:
           dotnet-version: '10.0.x'
 
       # The Sonar analysis engine is JVM-based; the .NET scanner shells out to it.
       - name: Setup Java
-        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        uses: actions/setup-java@v6.0.0
         with:
           distribution: temurin
           java-version: '21'
@@ -45,13 +45,18 @@ jobs:
       # point at. That is how the "problems with file encoding in the source code" warning arrived
       # (a newer XML sensor began sniffing non-source files); a floating analysis tool makes CI
       # results non-reproducible and turns analyzer changes into surprises on unrelated PRs.
-      # Bump this the way the SHA-pinned actions above are bumped: deliberately, in its own commit.
+      # Bump this the way the lockfile-pinned actions above are bumped: deliberately, in its own commit.
       - name: Install SonarScanner for .NET
         run: dotnet tool install --global dotnet-sonarscanner --version 11.2.1
 
       - name: Restore
         run: dotnet restore src/KerckhoffsLabs.sln --locked-mode
 
+      # githubactions:S7637 wants every third-party `uses:` pinned to a commit SHA inline. The
+      # workflows are pinned by .github/workflows/actions.lock instead, which Actions enforces at
+      # run time (transitive dependencies included); Sonar does not read the lockfile, so it
+      # flags every tag ref. Ignored for workflow files only: the organization's "Require lockfile"
+      # Actions policy blocks any workflow whose dependencies are not in the lockfile.
       - name: Begin analysis
         run: >
           dotnet sonarscanner begin
@@ -59,6 +64,9 @@ jobs:
           /o:"kerckhoffslabs"
           /d:sonar.host.url="https://sonarcloud.io"
           /d:sonar.cs.opencover.reportsPaths="coverage/**/coverage.opencover.xml"
+          /d:sonar.issue.ignore.multicriteria="actionslock"
+          /d:sonar.issue.ignore.multicriteria.actionslock.ruleKey="githubactions:S7637"
+          /d:sonar.issue.ignore.multicriteria.actionslock.resourceKey=".github/workflows/*.yml"
 
       - name: Build
         run: dotnet build src/KerckhoffsLabs.sln --no-restore -c Release
@@ -89,7 +97,7 @@ jobs:
       # Sonar import.
       - name: Upload coverage
         if: github.event_name == 'push'
-        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
+        uses: codecov/codecov-action@v7.0.0
         with:
           files: ./coverage/**/coverage.cobertura.xml
           fail_ci_if_error: true
