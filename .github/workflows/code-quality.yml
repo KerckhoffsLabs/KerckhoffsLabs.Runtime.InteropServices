@@ -52,6 +52,10 @@ jobs:
       - name: Restore
         run: dotnet restore src/KerckhoffsLabs.sln --locked-mode
 
+      # githubactions:S7637 wants every third-party `uses:` pinned to a commit SHA inline. The
+      # workflows are pinned by .github/workflows/actions.lock instead, which Actions enforces at
+      # run time (transitive dependencies included); Sonar does not read the lockfile, so it
+      # flags every tag ref. Ignored for workflow files only; `gh actions-lock --verify` is the check.
       - name: Begin analysis
         run: >
           dotnet sonarscanner begin
@@ -59,6 +63,9 @@ jobs:
           /o:"kerckhoffslabs"
           /d:sonar.host.url="https://sonarcloud.io"
           /d:sonar.cs.opencover.reportsPaths="coverage/**/coverage.opencover.xml"
+          /d:sonar.issue.ignore.multicriteria="actionslock"
+          /d:sonar.issue.ignore.multicriteria.actionslock.ruleKey="githubactions:S7637"
+          /d:sonar.issue.ignore.multicriteria.actionslock.resourceKey=".github/workflows/*.yml"
 
       - name: Build
         run: dotnet build src/KerckhoffsLabs.sln --no-restore -c Release
