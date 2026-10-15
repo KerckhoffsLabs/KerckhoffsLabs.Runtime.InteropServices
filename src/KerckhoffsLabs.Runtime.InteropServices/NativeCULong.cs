@@ -92,16 +92,16 @@ public readonly struct NativeCULong
     // The generic-math path is also available: NativeCULong.CreateChecked(int) and
     // int.CreateChecked(nativeCULong) work via INumberBase&lt;T&gt;.
 
-    /// <summary>Converts an <see cref="int"/> to a <see cref="NativeCULong"/>. Negative values wrap silently; the paired <c>checked</c> operator throws.</summary>
+    /// <summary>Converts an <see cref="int"/> to a <see cref="NativeCULong"/>. Negative values wrap silently; the paired <see langword="checked"/> operator throws.</summary>
     /// <param name="value">The value to convert.</param>
     public static explicit operator NativeCULong(int value) => FromNative(unchecked((NativeType)value));
     /// <summary>Converts a <see cref="uint"/> to a <see cref="NativeCULong"/>. Always exact; widens to <see cref="nuint"/> storage on Unix.</summary>
     /// <param name="value">The value to convert.</param>
     public static explicit operator NativeCULong(uint value) => FromNative(value);
-    /// <summary>Converts a <see cref="long"/> to a <see cref="NativeCULong"/>. Out-of-range values wrap silently; the paired <c>checked</c> operator throws.</summary>
+    /// <summary>Converts a <see cref="long"/> to a <see cref="NativeCULong"/>. Out-of-range values wrap silently; the paired <see langword="checked"/> operator throws.</summary>
     /// <param name="value">The value to convert.</param>
     public static explicit operator NativeCULong(long value) => FromNative(unchecked((NativeType)value));
-    /// <summary>Converts a <see cref="ulong"/> to a <see cref="NativeCULong"/>. On Windows (32-bit storage), values above <see cref="uint.MaxValue"/> wrap silently; the paired <c>checked</c> operator throws. On Unix (64-bit storage), always exact.</summary>
+    /// <summary>Converts a <see cref="ulong"/> to a <see cref="NativeCULong"/>. On Windows (32-bit storage), values above <see cref="uint.MaxValue"/> wrap silently; the paired <see langword="checked"/> operator throws. On Unix (64-bit storage), always exact.</summary>
     /// <param name="value">The value to convert.</param>
     public static explicit operator NativeCULong(ulong value) => FromNative(unchecked((NativeType)value));
     /// <summary>Converts an <see cref="nuint"/> to a <see cref="NativeCULong"/>. On Windows (32-bit storage), values above <see cref="uint.MaxValue"/> wrap silently. On Unix (64-bit storage), always exact.</summary>
@@ -120,15 +120,15 @@ public readonly struct NativeCULong
     /// <param name="value">The value to convert.</param>
     public static explicit operator checked NativeCULong(ulong value) => new(checked((nuint)value));
 
-    /// <summary>Converts a <see cref="NativeCULong"/> to an <see cref="int"/>. Values above <see cref="int.MaxValue"/> wrap to negative silently; the paired <c>checked</c> operator throws.</summary>
+    /// <summary>Converts a <see cref="NativeCULong"/> to an <see cref="int"/>. Values above <see cref="int.MaxValue"/> wrap to negative silently; the paired <see langword="checked"/> operator throws.</summary>
     /// <param name="value">The value to convert.</param>
     public static explicit operator int(NativeCULong value) => unchecked((int)value._value);
-    /// <summary>Converts a <see cref="NativeCULong"/> to a <see cref="uint"/>. On Unix (64-bit storage), values above <see cref="uint.MaxValue"/> truncate silently; the paired <c>checked</c> operator throws. On Windows (32-bit storage), always exact.</summary>
+    /// <summary>Converts a <see cref="NativeCULong"/> to a <see cref="uint"/>. On Unix (64-bit storage), values above <see cref="uint.MaxValue"/> truncate silently; the paired <see langword="checked"/> operator throws. On Windows (32-bit storage), always exact.</summary>
     /// <param name="value">The value to convert.</param>
     [SuppressMessage("Minor Code Smell", "S1905:Redundant casts should not be used",
         Justification = "value._value is NativeType: nuint in the default build (so (uint) is a required narrowing) and uint in the WINDOWS build (where the cast is an identity). The cast is mandatory in one of the two builds, so it cannot be removed.")]
     public static explicit operator uint(NativeCULong value) => unchecked((uint)value._value);
-    /// <summary>Converts a <see cref="NativeCULong"/> to a <see cref="long"/>. On Unix (64-bit storage), values above <see cref="long.MaxValue"/> wrap to negative silently; the paired <c>checked</c> operator throws. On Windows (32-bit storage), always exact.</summary>
+    /// <summary>Converts a <see cref="NativeCULong"/> to a <see cref="long"/>. On Unix (64-bit storage), values above <see cref="long.MaxValue"/> wrap to negative silently; the paired <see langword="checked"/> operator throws. On Windows (32-bit storage), always exact.</summary>
     /// <param name="value">The value to convert.</param>
     public static explicit operator long(NativeCULong value) => unchecked((long)value._value);
     /// <summary>Converts a <see cref="NativeCULong"/> to a <see cref="ulong"/>. Always exact.</summary>
@@ -157,14 +157,14 @@ public readonly struct NativeCULong
     /// Returns a value indicating whether this instance is equal to a specified object.
     /// </summary>
     /// <param name="obj">An object to compare with this instance.</param>
-    /// <returns><c>true</c> if <paramref name="obj"/> is an instance of <see cref="NativeCULong"/> and equals the value of this instance; otherwise, <c>false</c>.</returns>
+    /// <returns><see langword="true"/> if <paramref name="obj"/> is an instance of <see cref="NativeCULong"/> and equals the value of this instance; otherwise, <see langword="false"/>.</returns>
     public override bool Equals([NotNullWhen(true)] object? obj) => obj is NativeCULong other && Equals(other);
 
     /// <summary>
     /// Returns a value indicating whether this instance is equal to a specified <see cref="NativeCULong"/> value.
     /// </summary>
     /// <param name="other">A <see cref="NativeCULong"/> value to compare to this instance.</param>
-    /// <returns><c>true</c> if <paramref name="other"/> has the same value as this instance; otherwise, <c>false</c>.</returns>
+    /// <returns><see langword="true"/> if <paramref name="other"/> has the same value as this instance; otherwise, <see langword="false"/>.</returns>
     public bool Equals(NativeCULong other) => _value == other._value;
 
     /// <summary>
@@ -561,9 +561,9 @@ public readonly struct NativeCULong
         return result;
     }
 
-    /// <summary>Always returns <c>false</c>; <see cref="NativeCULong"/> is an unsigned type and can never be negative.</summary>
+    /// <summary>Always returns <see langword="false"/>; <see cref="NativeCULong"/> is an unsigned type and can never be negative.</summary>
     /// <param name="value">The value (ignored).</param>
-    /// <returns><c>false</c>.</returns>
+    /// <returns><see langword="false"/>.</returns>
     public static bool IsNegative(NativeCULong value) => false;
 
     /// <inheritdoc cref="INumber{TSelf}.Max(TSelf, TSelf)" />
@@ -601,24 +601,24 @@ public readonly struct NativeCULong
     /// <inheritdoc cref="INumber{TSelf}.Sign(TSelf)" />
     public static int Sign(NativeCULong value) => NativeType.Sign(value._value);
 
-    /// <summary>Attempts to parse a string as a <see cref="NativeCULong"/> using the specified <see cref="System.Globalization.NumberStyles"/> and format provider. Returns <c>true</c> and sets <paramref name="result"/> on success.</summary>
+    /// <summary>Attempts to parse a string as a <see cref="NativeCULong"/> using the specified <see cref="System.Globalization.NumberStyles"/> and format provider. Returns <see langword="true"/> and sets <paramref name="result"/> on success.</summary>
     /// <param name="s">The string to parse.</param>
     /// <param name="style">A bitwise combination of <see cref="System.Globalization.NumberStyles"/> values.</param>
     /// <param name="provider">An object that supplies culture-specific formatting information.</param>
-    /// <param name="result">When this method returns, contains the parsed value on success, or <c>default</c> on failure.</param>
-    /// <returns><c>true</c> if <paramref name="s"/> was parsed successfully; otherwise, <c>false</c>.</returns>
+    /// <param name="result">When this method returns, contains the parsed value on success, or <see langword="default"/> on failure.</param>
+    /// <returns><see langword="true"/> if <paramref name="s"/> was parsed successfully; otherwise, <see langword="false"/>.</returns>
     public static bool TryParse([NotNullWhen(true)] string? s, NumberStyles style, IFormatProvider? provider, out NativeCULong result)
     {
         Unsafe.SkipInit(out result);
         return NativeType.TryParse(s, style, provider, out Unsafe.As<NativeCULong, NativeType>(ref result));
     }
 
-    /// <summary>Attempts to parse a span of characters as a <see cref="NativeCULong"/> using the specified <see cref="System.Globalization.NumberStyles"/> and format provider. Returns <c>true</c> and sets <paramref name="result"/> on success.</summary>
+    /// <summary>Attempts to parse a span of characters as a <see cref="NativeCULong"/> using the specified <see cref="System.Globalization.NumberStyles"/> and format provider. Returns <see langword="true"/> and sets <paramref name="result"/> on success.</summary>
     /// <param name="s">The span to parse.</param>
     /// <param name="style">A bitwise combination of <see cref="System.Globalization.NumberStyles"/> values.</param>
     /// <param name="provider">An object that supplies culture-specific formatting information.</param>
-    /// <param name="result">When this method returns, contains the parsed value on success, or <c>default</c> on failure.</param>
-    /// <returns><c>true</c> if <paramref name="s"/> was parsed successfully; otherwise, <c>false</c>.</returns>
+    /// <param name="result">When this method returns, contains the parsed value on success, or <see langword="default"/> on failure.</param>
+    /// <returns><see langword="true"/> if <paramref name="s"/> was parsed successfully; otherwise, <see langword="false"/>.</returns>
     public static bool TryParse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider? provider, out NativeCULong result)
     {
         Unsafe.SkipInit(out result);
