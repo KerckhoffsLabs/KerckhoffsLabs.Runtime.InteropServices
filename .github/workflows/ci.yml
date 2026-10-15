@@ -59,10 +59,10 @@ jobs:
       # $(NativeCULongNarrow), not a TFM. Run the suite in both modes so each NativeCULong
       # layout (nuint and uint) is exercised regardless of host OS.
       - name: Test (wide / nuint)
-        run: dotnet test src/KerckhoffsLabs.sln --no-restore -c Release --logger "console;verbosity=normal"
+        run: dotnet test --solution src/KerckhoffsLabs.sln --no-restore -c Release --output Detailed
 
       - name: Test (narrow / uint)
-        run: dotnet test src/KerckhoffsLabs.sln --no-restore -c Release -p:NativeCULongNarrow=true --logger "console;verbosity=normal"
+        run: dotnet test --solution src/KerckhoffsLabs.sln --no-restore -c Release -p:NativeCULongNarrow=true --output Detailed
 
   integration:
     name: integration-${{ matrix.os }}

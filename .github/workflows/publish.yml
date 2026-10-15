@@ -31,7 +31,7 @@ jobs:
 
       - run: dotnet build src/KerckhoffsLabs.sln --no-restore -c Release /p:Version=$VERSION
 
-      - run: dotnet test src/KerckhoffsLabs.sln --no-build -c Release
+      - run: dotnet test --solution src/KerckhoffsLabs.sln --no-build -c Release
 
       - name: Pack
         run: dotnet pack src/KerckhoffsLabs.Runtime.InteropServices/KerckhoffsLabs.Runtime.InteropServices.csproj --no-build -c Release -o ./artifacts /p:Version=$VERSION

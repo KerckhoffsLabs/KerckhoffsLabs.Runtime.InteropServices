@@ -3,6 +3,14 @@
   <PropertyGroup>
     <!-- xunit.v3 test projects are self-hosting executables. -->
     <OutputType>Exe</OutputType>
+    <!--
+      Deliberately NOT set unconditionally here. UseMicrosoftTestingPlatformRunner=true generates
+      the full Microsoft.Testing.Platform entry point (not the legacy standalone in-process console
+      runner). The only reason to want it is so registered extensions such as coverlet.MTP's
+      TestingPlatformBuilderHook can wire themselves in, and the only legs that collect coverage
+      are the coverage steps in code-quality.yml, which pass -p:UseMicrosoftTestingPlatformRunner=true
+      explicitly. Every other build/test leg has no use for it and gets the legacy runner instead.
+    -->
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -31,9 +39,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="coverlet.collector" Version="10.0.1" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.9.0" />
-    <PackageReference Include="xunit.v3.mtp-off" Version="4.0.2" />
+    <!-- coverlet.collector is the VSTest-collector shim; MTP-native runs (dotnet test's coverage
+         option) need coverlet's own MTP extension instead. -->
+    <PackageReference Include="coverlet.MTP" Version="10.1.0" />
+    <PackageReference Include="xunit.v3" Version="4.0.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="4.0.1" />
   </ItemGroup>
 
