@@ -31,10 +31,10 @@ public partial class NativeCULongTests
         Assert.Equal(42u, value.Value);
     }
 
-    [ConditionalFact(typeof(PlatformLayout), nameof(PlatformLayout.NativeCULongConstructorCanOverflow))]
+    [Fact(Skip = "Requires a NativeCULong constructor that can overflow (32-bit storage on a 64-bit process).", SkipUnless = nameof(PlatformLayout.NativeCULongConstructorCanOverflow), SkipType = typeof(PlatformLayout))]
     public void Ctor_NUInt_OutOfRange() => Assert.Throws<OverflowException>(() => new NativeCULong(unchecked(((nuint)uint.MaxValue) + 1)));
 
-    [ConditionalFact(typeof(PlatformLayout), nameof(PlatformLayout.NativeCULongConstructorCannotOverflow))]
+    [Fact(Skip = "Requires a NativeCULong constructor that cannot overflow.", SkipUnless = nameof(PlatformLayout.NativeCULongConstructorCannotOverflow), SkipType = typeof(PlatformLayout))]
     public void Ctor_NUInt_LargeValue()
     {
         nuint largeValue = unchecked(((nuint)uint.MaxValue) + 1);
@@ -78,7 +78,7 @@ public partial class NativeCULongTests
         Assert.Equal(expected, value.Equals(obj));
     }
 
-    [ConditionalFact(typeof(PlatformLayout), nameof(PlatformLayout.Has64BitStorage))]
+    [Fact(Skip = "Requires 64-bit NativeCULong storage.", SkipUnless = nameof(PlatformLayout.Has64BitStorage), SkipType = typeof(PlatformLayout))]
     public void GetHashCode_64BitMaxValueCollidesWithZero()
     {
         // nuint.GetHashCode() XOR-folds the two 32-bit halves into a 32-bit int. For

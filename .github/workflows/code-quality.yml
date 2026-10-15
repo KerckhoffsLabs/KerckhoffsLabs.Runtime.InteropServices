@@ -52,6 +52,12 @@ jobs:
       - name: Restore
         run: dotnet restore src/KerckhoffsLabs.sln --locked-mode
 
+      # reportsPaths has a wildcard segment in the filename itself (coverage.opencover.*.xml, not a
+      # literal coverage.opencover.xml): coverlet.MTP names its output coverage.opencover.<id>.xml.
+      # A literal-filename glob silently matches nothing -- the scanner logs a WARN and imports
+      # zero coverage while the analysis still "succeeds". The Codecov "files:" glob below needs
+      # the same treatment for coverage.cobertura.*.xml.
+      #
       # githubactions:S7637 wants every third-party `uses:` pinned to a commit SHA inline. The
       # workflows are pinned by .github/workflows/actions.lock instead, which Actions enforces at
       # run time (transitive dependencies included); Sonar does not read the lockfile, so it
@@ -63,13 +69,13 @@ jobs:
           /k:"KerckhoffsLabs_KerckhoffsLabs.Runtime.InteropServices"
           /o:"kerckhoffslabs"
           /d:sonar.host.url="https://sonarcloud.io"
-          /d:sonar.cs.opencover.reportsPaths="coverage/**/coverage.opencover.xml"
+          /d:sonar.cs.opencover.reportsPaths="coverage/**/coverage.opencover.*.xml"
           /d:sonar.issue.ignore.multicriteria="actionslock"
           /d:sonar.issue.ignore.multicriteria.actionslock.ruleKey="githubactions:S7637"
           /d:sonar.issue.ignore.multicriteria.actionslock.resourceKey=".github/workflows/*.yml"
 
       - name: Build
-        run: dotnet build src/KerckhoffsLabs.sln --no-restore -c Release
+        run: dotnet build src/KerckhoffsLabs.sln --no-restore -c Release -p:UseMicrosoftTestingPlatformRunner=true
 
       # Cover both NativeCULong layouts so Sonar sees the #if WINDOWS branch too: the
       # wide (nuint) build reuses the Build above; the narrow (uint) build is selected
@@ -79,17 +85,16 @@ jobs:
       # is built and executed once instead of duplicated across a separate workflow.
       - name: Test with coverage (wide / nuint)
         run: >
-          dotnet test src/KerckhoffsLabs.sln --no-build -c Release
-          --collect:"XPlat Code Coverage;Format=opencover,cobertura"
-          --results-directory ./coverage
-          --logger "console;verbosity=normal"
+          dotnet test --solution src/KerckhoffsLabs.sln --no-build -c Release
+          --results-directory ./coverage --output Detailed
+          -- --coverlet --coverlet-output-format opencover --coverlet-output-format cobertura
 
       - name: Test with coverage (narrow / uint)
         run: >
-          dotnet test src/KerckhoffsLabs.sln --no-restore -c Release -p:NativeCULongNarrow=true
-          --collect:"XPlat Code Coverage;Format=opencover,cobertura"
-          --results-directory ./coverage
-          --logger "console;verbosity=normal"
+          dotnet test --solution src/KerckhoffsLabs.sln --no-restore -c Release -p:NativeCULongNarrow=true
+          -p:UseMicrosoftTestingPlatformRunner=true
+          --results-directory ./coverage --output Detailed
+          -- --coverlet --coverlet-output-format opencover --coverlet-output-format cobertura
 
       # Upload the Cobertura reports to Codecov. Push-only to preserve the previous
       # coverage workflow's trigger (and to avoid touching fork PRs, where the token is
@@ -99,7 +104,7 @@ jobs:
         if: github.event_name == 'push'
         uses: codecov/codecov-action@v7.1.1
         with:
-          files: ./coverage/**/coverage.cobertura.xml
+          files: ./coverage/**/coverage.cobertura.*.xml
           fail_ci_if_error: true
           verbose: true
         env:

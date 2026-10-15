@@ -14,14 +14,17 @@ internal static class PlatformLayout
     // every other target uses nuint. So the predicate must mirror the compilation the test
     // assembly was built for — keying off OperatingSystem.IsWindows() at runtime would be
     // wrong whenever the build OS and the target framework disagree.
-    internal static bool Has32BitStorage =>
+    //
+    // Public because xUnit's [Fact(SkipUnless = ..., SkipType = typeof(PlatformLayout))] only
+    // resolves public static bool properties (xUnit1054).
+    public static bool Has32BitStorage =>
 #if WINDOWS
         true;
 #else
         IntPtr.Size == 4;
 #endif
-    internal static bool Has64BitStorage => !Has32BitStorage;
+    public static bool Has64BitStorage => !Has32BitStorage;
 
-    internal static bool NativeCULongConstructorCanOverflow => IntPtr.Size != 4 && Has32BitStorage;
-    internal static bool NativeCULongConstructorCannotOverflow => !NativeCULongConstructorCanOverflow;
+    public static bool NativeCULongConstructorCanOverflow => IntPtr.Size != 4 && Has32BitStorage;
+    public static bool NativeCULongConstructorCannotOverflow => !NativeCULongConstructorCanOverflow;
 }

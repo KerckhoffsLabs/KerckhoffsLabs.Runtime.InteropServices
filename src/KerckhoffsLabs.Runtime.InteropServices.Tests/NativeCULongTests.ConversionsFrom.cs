@@ -40,11 +40,11 @@ public partial class NativeCULongTests
     [Fact]
     public void CreateChecked_FromLong_WithinUInt32Range() => Assert.Equal(new NativeCULong(0xFFFFFFFF), NumberBaseHelper<NativeCULong>.CreateChecked<long>(0xFFFFFFFFL));
 
-    [ConditionalFact(typeof(PlatformLayout), nameof(PlatformLayout.Has32BitStorage))]
+    [Fact(Skip = "Requires 32-bit NativeCULong storage.", SkipUnless = nameof(PlatformLayout.Has32BitStorage), SkipType = typeof(PlatformLayout))]
     public void CreateChecked_FromLong_ExceedingUInt32MaxThrowsOn32BitStorage() => Assert.Throws<OverflowException>(() => NumberBaseHelper<NativeCULong>.CreateChecked<long>(0x1_0000_0000L));
 
 #pragma warning disable CS8778 // intentional 64-bit-storage literal; gated at runtime by Has64BitStorage
-    [ConditionalFact(typeof(PlatformLayout), nameof(PlatformLayout.Has64BitStorage))]
+    [Fact(Skip = "Requires 64-bit NativeCULong storage.", SkipUnless = nameof(PlatformLayout.Has64BitStorage), SkipType = typeof(PlatformLayout))]
     public void CreateChecked_FromLong_ExceedingUInt32MaxFitsOn64BitStorage() => Assert.Equal(new NativeCULong((nuint)0x1_0000_0000UL), NumberBaseHelper<NativeCULong>.CreateChecked<long>(0x1_0000_0000L));
 #pragma warning restore CS8778
 
@@ -58,7 +58,7 @@ public partial class NativeCULongTests
         Assert.Equal(new NativeCULong(0xFFFFFFFFu), NumberBaseHelper<NativeCULong>.CreateChecked<ulong>(0xFFFFFFFFUL));
     }
 
-    [ConditionalFact(typeof(PlatformLayout), nameof(PlatformLayout.Has32BitStorage))]
+    [Fact(Skip = "Requires 32-bit NativeCULong storage.", SkipUnless = nameof(PlatformLayout.Has32BitStorage), SkipType = typeof(PlatformLayout))]
     public void CreateChecked_FromUlong_ExceedingStorage_ThrowsOn32BitStorage() => Assert.Throws<OverflowException>(() => NumberBaseHelper<NativeCULong>.CreateChecked<ulong>(0x1_0000_0000UL));
 
     [Fact]
@@ -81,10 +81,10 @@ public partial class NativeCULongTests
     [Fact]
     public void CreateSaturating_FromUlong_WithinRange_RoundTrips() => Assert.Equal(new NativeCULong(0xFFFFFFFFu), NumberBaseHelper<NativeCULong>.CreateSaturating<ulong>(0xFFFFFFFFUL));
 
-    [ConditionalFact(typeof(PlatformLayout), nameof(PlatformLayout.Has32BitStorage))]
+    [Fact(Skip = "Requires 32-bit NativeCULong storage.", SkipUnless = nameof(PlatformLayout.Has32BitStorage), SkipType = typeof(PlatformLayout))]
     public void CreateSaturating_FromUlong_ExceedingStorage_SaturatesToMaxOn32BitStorage() => Assert.Equal(NativeCULong.MaxValue, NumberBaseHelper<NativeCULong>.CreateSaturating<ulong>(0x1_0000_0000UL));
 
-    [ConditionalFact(typeof(PlatformLayout), nameof(PlatformLayout.Has32BitStorage))]
+    [Fact(Skip = "Requires 32-bit NativeCULong storage.", SkipUnless = nameof(PlatformLayout.Has32BitStorage), SkipType = typeof(PlatformLayout))]
     public void CreateSaturating_FromLong_ExceedingUInt32MaxSaturatesOn32BitStorage() => Assert.Equal(NativeCULong.MaxValue, NumberBaseHelper<NativeCULong>.CreateSaturating<long>(0x1_0000_0000L));
 
     [Fact]
@@ -107,10 +107,10 @@ public partial class NativeCULongTests
     [Fact]
     public void CreateTruncating_FromUlong_RoundTrips() => Assert.Equal(new NativeCULong(0xFFFFFFFFu), NumberBaseHelper<NativeCULong>.CreateTruncating<ulong>(0xFFFFFFFFUL));
 
-    [ConditionalFact(typeof(PlatformLayout), nameof(PlatformLayout.Has32BitStorage))]
+    [Fact(Skip = "Requires 32-bit NativeCULong storage.", SkipUnless = nameof(PlatformLayout.Has32BitStorage), SkipType = typeof(PlatformLayout))]
     public void CreateTruncating_FromLong_HighBitsDroppedOn32BitStorage() => Assert.Equal(new NativeCULong(0x00000001), NumberBaseHelper<NativeCULong>.CreateTruncating<long>(0x1_0000_0001L));
 
-    [ConditionalFact(typeof(PlatformLayout), nameof(PlatformLayout.Has32BitStorage))]
+    [Fact(Skip = "Requires 32-bit NativeCULong storage.", SkipUnless = nameof(PlatformLayout.Has32BitStorage), SkipType = typeof(PlatformLayout))]
     public void CreateTruncating_FromUlong_HighBitsDroppedOn32BitStorage() => Assert.Equal(new NativeCULong(0x00000001u), NumberBaseHelper<NativeCULong>.CreateTruncating<ulong>(0x1_0000_0001UL));
 
     //
