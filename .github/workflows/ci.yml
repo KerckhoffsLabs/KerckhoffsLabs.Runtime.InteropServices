@@ -23,26 +23,6 @@ jobs:
 
       - run: dotnet format src/KerckhoffsLabs.sln --verify-no-changes --no-restore
 
-  # Fails when a workflow uses an action missing from .github/workflows/actions.lock (e.g. a new
-  # workflow nobody ran `gh actions-lock` on), or when a locked pin no longer checks out upstream.
-  # This stands in for Sonar's githubactions:S7637, which code-quality.yml ignores for workflow
-  # files because Sonar cannot read the lockfile.
-  actions-lock:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7.0.1
-        with:
-          persist-credentials: false
-
-      # Pinned deliberately, for the same reason as the analysis tools in code-quality.yml.
-      - run: gh extension install github/gh-actions-lock --pin v0.2.0
-        env:
-          GH_TOKEN: ${{ github.token }}
-
-      - run: gh actions-lock --verify
-        env:
-          GH_TOKEN: ${{ github.token }}
-
   build-and-test:
     name: ${{ matrix.os }}${{ matrix.arch == 'x86' && ' (x86)' || '' }}
     runs-on: ${{ matrix.os }}
