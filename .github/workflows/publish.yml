@@ -4,6 +4,11 @@ on:
   push:
     tags: ['v*']
 
+# None by default: each job declares what it needs (publish: contents read, id-token and attestations
+# write; docs-build: contents and pages read; docs-deploy: pages and id-token write), and a job added
+# later starts with no token permissions until it asks.
+permissions: {}
+
 jobs:
   publish:
     runs-on: ubuntu-latest
