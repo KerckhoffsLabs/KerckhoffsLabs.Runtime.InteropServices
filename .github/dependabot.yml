@@ -1,0 +1,55 @@
+version: 2
+
+# A cooldown lets a fresh release show its defects before it is adopted. Applied uniformly, it would
+# also delay security fixes that ship without an advisory, which Dependabot cannot tell apart from an
+# ordinary bump. So the wait is split: patch releases, where security fixes land and whose regressions
+# are the cheapest to revert, wait one day; everything else waits a week.
+#
+# Each ecosystem has two groups. Without `applies-to`, a group covers version updates only and every
+# security update arrives in a pull request of its own: one group takes the weekly bump, the other
+# whatever security opens.
+updates:
+  # The solution under src/. Its projects restore from packages.lock.json in locked mode, and
+  # Dependabot updates the lock files with the version. tests/Integration is left out on purpose:
+  # it is not in the solution and floats (Version="*") on the package CI packs into a local feed.
+  - package-ecosystem: nuget
+    directory: /src
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+      semver-patch-days: 1
+    open-pull-requests-limit: 10
+    groups:
+      nuget:
+        applies-to: version-updates
+        patterns: ["*"]
+      nuget-security:
+        applies-to: security-updates
+        patterns: ["*"]
+    commit-message:
+      prefix: "chore(deps)"
+
+  # Workflows reference actions by tag and pin them in .github/workflows/actions.lock, which the
+  # organization's "Require lockfile" policy enforces. A bump that leaves the lockfile behind is
+  # blocked until it is regenerated: run `gh actions-lock` on the pull request's branch.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      # semver-patch-days is not supported for github-actions.
+      default-days: 7
+    groups:
+      actions:
+        applies-to: version-updates
+        patterns: ["*"]
+      actions-security:
+        applies-to: security-updates
+        patterns: ["*"]
+    commit-message:
+      prefix: "ci"
+
+# Deliberately not tracked: dotnet-sdk. global.json names 10.0.100 with rollForward: latestFeature,
+# and CI installs the latest 10.0.x, so builds already use the newest SDK; raising the floor would
+# only stop older 10.0 SDKs from building the repository.
