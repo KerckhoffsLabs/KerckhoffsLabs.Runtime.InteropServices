@@ -8,6 +8,7 @@
 [![.NET](https://img.shields.io/badge/.NET-10.0-512BD4)](https://dotnet.microsoft.com/download/dotnet/10.0)
 [![codecov](https://codecov.io/gh/KerckhoffsLabs/KerckhoffsLabs.Runtime.InteropServices/graph/badge.svg?token=9N30Z15QRA)](https://codecov.io/gh/KerckhoffsLabs/KerckhoffsLabs.Runtime.InteropServices)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=KerckhoffsLabs_KerckhoffsLabs.Runtime.InteropServices&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=KerckhoffsLabs_KerckhoffsLabs.Runtime.InteropServices)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/KerckhoffsLabs/KerckhoffsLabs.Runtime.InteropServices/badge)](https://scorecard.dev/viewer/?uri=github.com/KerckhoffsLabs/KerckhoffsLabs.Runtime.InteropServices)
 
 ## Overview
 
