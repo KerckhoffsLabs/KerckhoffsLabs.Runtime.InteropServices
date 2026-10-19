@@ -24,7 +24,7 @@ jobs:
 
       - uses: actions/setup-dotnet@v6.0.0
         with:
-          dotnet-version: '10.0.x'
+          dotnet-version: '10.0.402' # exact SDK: the lock files record its ILLink.Tasks (see the library's .csproj)
 
       # Derive the version from the tag once so the build stamps it into the
       # assembly (AssemblyVersion/FileVersion/InformationalVersion), not just the
@@ -70,7 +70,7 @@ jobs:
 
       - uses: actions/setup-dotnet@v6.0.0
         with:
-          dotnet-version: '10.0.x'
+          dotnet-version: '10.0.402' # exact SDK: the lock files record its ILLink.Tasks (see the library's .csproj)
 
       # Pinned for the same reason as the scanner in code-quality.yml: an unpinned tool floats to
       # latest per run. It matters more here — this job runs only on release tags and builds with

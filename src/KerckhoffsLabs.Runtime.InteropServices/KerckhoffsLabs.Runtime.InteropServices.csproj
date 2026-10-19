@@ -5,6 +5,15 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <IsAotCompatible>true</IsAotCompatible>
+    <EnableAotAnalyzer>true</EnableAotAnalyzer>
+    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+    <!-- IsAotCompatible makes the SDK add Microsoft.NET.ILLink.Tasks, which packages.lock.json records at
+         the version of the SDK that restored it. CI therefore installs one exact SDK (dotnet-version in
+         the workflows) and restores in locked mode against lock files generated with that SDK. To move
+         to a newer SDK, change dotnet-version in every workflow, then, with that SDK installed, run
+         `dotnet restore src/KerckhoffsLabs.sln` with its force-evaluate switch to regenerate the lock
+         files; commit both together. -->
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <LangVersion>13.0</LangVersion>
