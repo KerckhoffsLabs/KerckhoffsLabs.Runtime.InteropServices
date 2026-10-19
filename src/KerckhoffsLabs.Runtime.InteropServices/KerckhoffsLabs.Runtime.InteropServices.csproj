@@ -25,6 +25,7 @@
     <Version>0.0.0</Version>
     <Authors>KerckhoffsLabs and contributors</Authors>
     <Description>Provides support for platform-native interop types used at the managed/unmanaged boundary.</Description>
+    <PackageTags>interop;pinvoke;native;culong;unsigned-long;abi;cross-platform</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>icon.png</PackageIcon>
