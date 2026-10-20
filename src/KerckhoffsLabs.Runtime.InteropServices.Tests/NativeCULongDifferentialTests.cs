@@ -166,13 +166,17 @@ public sealed class NativeCULongDifferentialTests
         new(unchecked((nuint)bits));
 #endif
 
+    // Only the exceptions an integer operation is documented to throw are outcomes to compare: overflow
+    // and division by zero (ArithmeticException), unparsable text (FormatException), an invalid style,
+    // format or argument (ArgumentException) and an unsupported conversion (NotSupportedException). Any
+    // other exception is a bug in itself and fails the test as it is.
     private static string Outcome(Func<object?> operation)
     {
         try
         {
             return Show(operation());
         }
-        catch (Exception e)
+        catch (Exception e) when (e is ArithmeticException or FormatException or ArgumentException or NotSupportedException)
         {
             return e.GetType().Name;
         }
@@ -268,7 +272,7 @@ public sealed class NativeCULongDifferentialTests
             ("x.GetShortestBitLength()", x => x.GetShortestBitLength()),
             ("x.GetByteCount()", x => x.GetByteCount()),
             ("x.Equals((object)x)", x => x.Equals((object)x)),
-            ("x.Equals(null)", x => x.Equals(null)),
+            ("x.Equals((object)0)", x => x.Equals((object)0)),
             ("x == MaxValue", x => x == T.MaxValue),
             ("x == MinValue", x => x == T.MinValue),
             ("x.ToString()", x => x.ToString()),
