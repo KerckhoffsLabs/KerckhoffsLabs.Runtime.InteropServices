@@ -584,6 +584,13 @@ public readonly struct NativeCULong
     /// <returns>The parsed <see cref="NativeCULong"/>.</returns>
     public static NativeCULong Parse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider? provider) => new(NativeType.Parse(s, style, provider));
 
+    /// <summary>Parses a span of UTF-8 characters representing an integer into a <see cref="NativeCULong"/> using the specified <see cref="System.Globalization.NumberStyles"/> and format provider.</summary>
+    /// <param name="utf8Text">The span of UTF-8 characters to parse.</param>
+    /// <param name="style">A bitwise combination of <see cref="System.Globalization.NumberStyles"/> values that indicates the permitted format of <paramref name="utf8Text"/>.</param>
+    /// <param name="provider">An object that supplies culture-specific formatting information.</param>
+    /// <returns>The parsed <see cref="NativeCULong"/>.</returns>
+    public static NativeCULong Parse(ReadOnlySpan<byte> utf8Text, NumberStyles style, IFormatProvider? provider) => new(NativeType.Parse(utf8Text, style, provider));
+
     /// <inheritdoc cref="INumber{TSelf}.Sign(TSelf)" />
     public static int Sign(NativeCULong value) => NativeType.Sign(value._value);
 
@@ -609,6 +616,18 @@ public readonly struct NativeCULong
     {
         Unsafe.SkipInit(out result);
         return NativeType.TryParse(s, style, provider, out Unsafe.As<NativeCULong, NativeType>(ref result));
+    }
+
+    /// <summary>Attempts to parse a span of UTF-8 characters as a <see cref="NativeCULong"/> using the specified <see cref="System.Globalization.NumberStyles"/> and format provider. Returns <see langword="true"/> and sets <paramref name="result"/> on success.</summary>
+    /// <param name="utf8Text">The span of UTF-8 characters to parse.</param>
+    /// <param name="style">A bitwise combination of <see cref="System.Globalization.NumberStyles"/> values.</param>
+    /// <param name="provider">An object that supplies culture-specific formatting information.</param>
+    /// <param name="result">When this method returns, contains the parsed value on success, or <see langword="default"/> on failure.</param>
+    /// <returns><see langword="true"/> if <paramref name="utf8Text"/> was parsed successfully; otherwise, <see langword="false"/>.</returns>
+    public static bool TryParse(ReadOnlySpan<byte> utf8Text, NumberStyles style, IFormatProvider? provider, out NativeCULong result)
+    {
+        Unsafe.SkipInit(out result);
+        return NativeType.TryParse(utf8Text, style, provider, out Unsafe.As<NativeCULong, NativeType>(ref result));
     }
 
     //
@@ -950,29 +969,12 @@ public readonly struct NativeCULong
     //
     // IUtf8SpanParsable
     //
-    // Without these, INumberBase's default implementations transcode the text to UTF-16 and parse that,
-    // which doesn't always agree with the storage type's own UTF-8 parser: for a culture whose group
-    // separator is a narrow no-break space, such as fr-FR, the UTF-16 parser also accepts an ordinary
-    // space and the UTF-8 one doesn't. Delegating keeps NativeCULong's answer the storage type's.
-
-    /// <summary>Parses a span of UTF-8 characters representing an integer into a <see cref="NativeCULong"/> using the specified <see cref="System.Globalization.NumberStyles"/> and format provider.</summary>
-    /// <param name="utf8Text">The span of UTF-8 characters to parse.</param>
-    /// <param name="style">A bitwise combination of <see cref="System.Globalization.NumberStyles"/> values that indicates the permitted format of <paramref name="utf8Text"/>.</param>
-    /// <param name="provider">An object that supplies culture-specific formatting information.</param>
-    /// <returns>The parsed <see cref="NativeCULong"/>.</returns>
-    public static NativeCULong Parse(ReadOnlySpan<byte> utf8Text, NumberStyles style, IFormatProvider? provider) => new(NativeType.Parse(utf8Text, style, provider));
-
-    /// <summary>Attempts to parse a span of UTF-8 characters as a <see cref="NativeCULong"/> using the specified <see cref="System.Globalization.NumberStyles"/> and format provider. Returns <see langword="true"/> and sets <paramref name="result"/> on success.</summary>
-    /// <param name="utf8Text">The span of UTF-8 characters to parse.</param>
-    /// <param name="style">A bitwise combination of <see cref="System.Globalization.NumberStyles"/> values.</param>
-    /// <param name="provider">An object that supplies culture-specific formatting information.</param>
-    /// <param name="result">When this method returns, contains the parsed value on success, or <see langword="default"/> on failure.</param>
-    /// <returns><see langword="true"/> if <paramref name="utf8Text"/> was parsed successfully; otherwise, <see langword="false"/>.</returns>
-    public static bool TryParse(ReadOnlySpan<byte> utf8Text, NumberStyles style, IFormatProvider? provider, out NativeCULong result)
-    {
-        Unsafe.SkipInit(out result);
-        return NativeType.TryParse(utf8Text, style, provider, out Unsafe.As<NativeCULong, NativeType>(ref result));
-    }
+    // Without these and the NumberStyles overloads of Parse and TryParse taking UTF-8 (with the other
+    // NumberStyles overloads above), INumberBase's default implementations transcode the text to UTF-16
+    // and parse that, which doesn't always agree with the storage type's own UTF-8 parser: for a
+    // culture whose group separator is a narrow no-break space, such as fr-FR, the UTF-16 parser also
+    // accepts an ordinary space and the UTF-8 one doesn't. Delegating keeps NativeCULong's answer the
+    // storage type's.
 
     /// <inheritdoc cref="IUtf8SpanParsable{TSelf}.Parse(ReadOnlySpan{byte}, IFormatProvider?)" />
     public static NativeCULong Parse(ReadOnlySpan<byte> utf8Text, IFormatProvider? provider) => Parse(utf8Text, NumberStyles.Integer, provider);
