@@ -8,9 +8,10 @@ on:
 # release with the attested packages attached. Don't create the release by hand first: releases are
 # immutable, so one already published can't take the packages and the release job fails.
 #
+# The documentation site is published by docs.yml, on every push to main that changes it.
+#
 # None by default: each job declares what it needs (publish: contents read, id-token and attestations
-# write; release: contents write; docs-build: contents and pages read; docs-deploy: pages and id-token
-# write), and a job added later starts with no token permissions until it asks.
+# write; release: contents write), and a job added later starts with no token permissions until it asks.
 permissions: {}
 
 jobs:
@@ -103,60 +104,3 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: gh release create "$GITHUB_REF_NAME" ./artifacts/*.nupkg ./artifacts/*.snupkg --verify-tag --generate-notes
-
-  # Refresh the DocFX API-reference site on GitHub Pages as part of each release.
-  # Pages must already be enabled with "GitHub Actions" as the source (Settings ->
-  # Pages); the initial deploy was seeded once by the docs-bootstrap workflow.
-  docs-build:
-    name: Build docs site
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    permissions:
-      contents: read   # checkout
-      pages: read      # configure-pages reads the site config
-    steps:
-      - uses: actions/checkout@v7.0.1
-        with:
-          persist-credentials: false
-
-      - uses: actions/setup-dotnet@v6.0.0
-        with:
-          dotnet-version: '10.0.402' # exact SDK: the lock files record its ILLink.Tasks (see the library's .csproj)
-
-      # Pinned for the same reason as the scanner in code-quality.yml: an unpinned tool floats to
-      # latest per run. It matters more here — this job runs only on release tags and builds with
-      # --warningsAsErrors, so a docfx change that emits a new warning would first surface as a
-      # failed release rather than as a failed PR.
-      - name: Install docfx
-        run: dotnet tool install --global docfx --version 2.78.5
-
-      - name: Build documentation (metadata + site)
-        run: docfx docs/docfx.json --warningsAsErrors
-
-      - name: Configure Pages
-        uses: actions/configure-pages@v6.0.0
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v5.0.0
-        with:
-          path: docs/_site
-
-  docs-deploy:
-    name: Deploy docs to GitHub Pages
-    needs: docs-build
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    # Serialize Pages deployments across workflows; don't cancel an in-flight publish.
-    concurrency:
-      group: pages
-      cancel-in-progress: false
-    permissions:
-      pages: write     # deploy-pages publishes the artifact
-      id-token: write  # deploy-pages authenticates to the Pages API via OIDC
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy
-        id: deployment
-        uses: actions/deploy-pages@v5.0.1

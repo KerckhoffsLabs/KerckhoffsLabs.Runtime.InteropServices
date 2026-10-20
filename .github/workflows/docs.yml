@@ -1,0 +1,74 @@
+name: Docs
+
+# Build the DocFX site and publish it to GitHub Pages.
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'docs/**'
+      - 'src/KerckhoffsLabs.Runtime.InteropServices/**'
+      - 'global.json'
+      - '.github/workflows/docs.yml'
+  workflow_dispatch:
+
+# Permissions are declared per job (least privilege): the build job only reads, the deploy job
+# holds the pages:write + id-token:write the deployment needs. None at workflow level, so a job
+# added later starts with no token permissions until it asks.
+permissions: {}
+
+# Serialize Pages deployments; don't cancel an in-flight publish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build site
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read   # checkout
+      pages: read      # configure-pages reads the site config
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-dotnet@v6.0.0
+        with:
+          dotnet-version: '10.0.402' # exact SDK: the lock files record its ILLink.Tasks (see the library's .csproj)
+
+      # Pinned for the same reason as the scanner in code-quality.yml: an unpinned tool floats to
+      # latest per run, and the site builds with --warningsAsErrors, so a docfx change that emits a
+      # new warning would fail a docs build with no commit to point at.
+      - name: Install docfx
+        run: dotnet tool install --global docfx --version 2.78.5
+
+      - name: Build documentation (metadata + site)
+        run: docfx docs/docfx.json --warningsAsErrors
+
+      # Pages must already be enabled with "GitHub Actions" as the source
+      # (Settings -> Pages); the workflow token cannot create the site itself.
+      - name: Configure Pages
+        uses: actions/configure-pages@v6.0.0
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5.0.0
+        with:
+          path: docs/_site
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write     # deploy-pages publishes the artifact
+      id-token: write  # deploy-pages authenticates to the Pages API via OIDC
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v5.0.1
