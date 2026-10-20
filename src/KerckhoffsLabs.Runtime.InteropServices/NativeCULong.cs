@@ -283,44 +283,30 @@ public readonly struct NativeCULong
     }
 
     /// <inheritdoc cref="IBinaryInteger{TSelf}.TryReadLittleEndian(ReadOnlySpan{byte}, bool, out TSelf)" />
-    static unsafe bool IBinaryInteger<NativeCULong>.TryReadLittleEndian(ReadOnlySpan<byte> source, bool isUnsigned, out NativeCULong value)
+    static bool IBinaryInteger<NativeCULong>.TryReadLittleEndian(ReadOnlySpan<byte> source, bool isUnsigned, out NativeCULong value)
     {
         Unsafe.SkipInit(out value);
-
-        if (source.Length < sizeof(NativeType))
-        {
-            return false;
-        }
-
-        NativeType result = Unsafe.ReadUnaligned<NativeType>(ref MemoryMarshal.GetReference(source));
-        if (!BitConverter.IsLittleEndian)
-        {
-            result = BinaryPrimitives.ReverseEndianness(result);
-        }
-
-        value = new NativeCULong(result);
-        return true;
+        return ReadLittleEndianAs(source, isUnsigned, out Unsafe.As<NativeCULong, NativeType>(ref value));
     }
 
     /// <inheritdoc cref="IBinaryInteger{TSelf}.TryReadBigEndian(ReadOnlySpan{byte}, bool, out TSelf)" />
-    static unsafe bool IBinaryInteger<NativeCULong>.TryReadBigEndian(ReadOnlySpan<byte> source, bool isUnsigned, out NativeCULong value)
+    static bool IBinaryInteger<NativeCULong>.TryReadBigEndian(ReadOnlySpan<byte> source, bool isUnsigned, out NativeCULong value)
     {
         Unsafe.SkipInit(out value);
-
-        if (source.Length < sizeof(NativeType))
-        {
-            return false;
-        }
-
-        NativeType result = Unsafe.ReadUnaligned<NativeType>(ref MemoryMarshal.GetReference(source));
-        if (BitConverter.IsLittleEndian)
-        {
-            result = BinaryPrimitives.ReverseEndianness(result);
-        }
-
-        value = new NativeCULong(result);
-        return true;
+        return ReadBigEndianAs(source, isUnsigned, out Unsafe.As<NativeCULong, NativeType>(ref value));
     }
+
+    // NativeType's TryRead*Endian carry the whole contract: a shorter source is zero-extended, a longer
+    // one is accepted only when its extra high-order bytes are zero, and with isUnsigned false a set
+    // sign bit is a negative value, which fails. They are explicit interface implementations, so they
+    // are reachable only through a type parameter.
+    private static bool ReadBigEndianAs<T>(ReadOnlySpan<byte> source, bool isUnsigned, out T value)
+        where T : IBinaryInteger<T>
+        => T.TryReadBigEndian(source, isUnsigned, out value);
+
+    private static bool ReadLittleEndianAs<T>(ReadOnlySpan<byte> source, bool isUnsigned, out T value)
+        where T : IBinaryInteger<T>
+        => T.TryReadLittleEndian(source, isUnsigned, out value);
 
     //
     // IBinaryNumber
@@ -816,7 +802,7 @@ public readonly struct NativeCULong
         if (typeof(TOther) == typeof(nint)) { nint r = checked((nint)v); result = (TOther)(object)r; return true; }
         if (typeof(TOther) == typeof(Int128)) { Int128 r = v; result = (TOther)(object)r; return true; }
 
-        return TOther.TryConvertFromChecked(v, out result);
+        return ConvertULongToChecked(v, out result);
     }
 
     /// <inheritdoc cref="INumberBase{TSelf}.TryConvertToSaturating{TOther}(TSelf, out TOther)" />
@@ -833,7 +819,7 @@ public readonly struct NativeCULong
         if (typeof(TOther) == typeof(nint)) { nint r = v > (ulong)nint.MaxValue ? nint.MaxValue : (nint)v; result = (TOther)(object)r; return true; }
         if (typeof(TOther) == typeof(Int128)) { Int128 r = v; result = (TOther)(object)r; return true; }
 
-        return TOther.TryConvertFromSaturating(v, out result);
+        return ConvertULongToSaturating(v, out result);
     }
 
     /// <inheritdoc cref="INumberBase{TSelf}.TryConvertToTruncating{TOther}(TSelf, out TOther)" />
@@ -849,8 +835,50 @@ public readonly struct NativeCULong
         if (typeof(TOther) == typeof(nint)) { nint r = unchecked((nint)v); result = (TOther)(object)r; return true; }
         if (typeof(TOther) == typeof(Int128)) { Int128 r = v; result = (TOther)(object)r; return true; }
 
-        return TOther.TryConvertFromTruncating(v, out result);
+        return ConvertULongToTruncating(v, out result);
     }
+
+    // The rest of each TryConvertToXxx above: v holds the value exactly at either storage width, so
+    // this is ulong's own conversion, through the dispatch CreateXxx uses. Neither half alone covers
+    // every target: ulong.TryConvertFromXxx never lists ulong itself (CreateXxx handles the identity
+    // first), and the floating-point targets (Half, float, double) are converted on ulong's side, by
+    // ulong.TryConvertToXxx.
+    private static bool ConvertULongToChecked<TOther>(ulong value, [MaybeNullWhen(false)] out TOther result)
+        where TOther : INumberBase<TOther>
+    {
+        if (typeof(TOther) == typeof(ulong)) { result = (TOther)(object)value; return true; }
+        return TOther.TryConvertFromChecked(value, out result) || ConvertToChecked<ulong, TOther>(value, out result);
+    }
+
+    private static bool ConvertULongToSaturating<TOther>(ulong value, [MaybeNullWhen(false)] out TOther result)
+        where TOther : INumberBase<TOther>
+    {
+        if (typeof(TOther) == typeof(ulong)) { result = (TOther)(object)value; return true; }
+        return TOther.TryConvertFromSaturating(value, out result) || ConvertToSaturating<ulong, TOther>(value, out result);
+    }
+
+    private static bool ConvertULongToTruncating<TOther>(ulong value, [MaybeNullWhen(false)] out TOther result)
+        where TOther : INumberBase<TOther>
+    {
+        if (typeof(TOther) == typeof(ulong)) { result = (TOther)(object)value; return true; }
+        return TOther.TryConvertFromTruncating(value, out result) || ConvertToTruncating<ulong, TOther>(value, out result);
+    }
+
+    // TFrom.TryConvertToXxx are explicit interface implementations too, reachable only through a type parameter.
+    private static bool ConvertToChecked<TFrom, TOther>(TFrom value, [MaybeNullWhen(false)] out TOther result)
+        where TFrom : INumberBase<TFrom>
+        where TOther : INumberBase<TOther>
+        => TFrom.TryConvertToChecked(value, out result);
+
+    private static bool ConvertToSaturating<TFrom, TOther>(TFrom value, [MaybeNullWhen(false)] out TOther result)
+        where TFrom : INumberBase<TFrom>
+        where TOther : INumberBase<TOther>
+        => TFrom.TryConvertToSaturating(value, out result);
+
+    private static bool ConvertToTruncating<TFrom, TOther>(TFrom value, [MaybeNullWhen(false)] out TOther result)
+        where TFrom : INumberBase<TFrom>
+        where TOther : INumberBase<TOther>
+        => TFrom.TryConvertToTruncating(value, out result);
 
     //
     // IParsable
