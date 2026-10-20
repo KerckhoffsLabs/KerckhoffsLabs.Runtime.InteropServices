@@ -4,9 +4,13 @@
 // through BCL primitive T.CreateXxx → T.TryConvertFromChecked<NativeCULong> (false,
 // NativeCULong isn't in T's from-table) → NativeCULong.TryConvertToXxx<T> (our explicit-
 // interface impl). The To impls have their own typeof switch handling the signed-integer
-// arms directly; other targets delegate to T.TryConvertFromXxx with a ulong source.
+// arms directly; every other target goes through ulong's own conversion (ulong itself,
+// then T.TryConvertFromXxx, then ulong.TryConvertToXxx, which is where the floating-point
+// targets are handled).
 //
 // From-direction tests (NativeCULong <- TOther) live in NativeCULongTests.ConversionsFrom.cs.
+
+using static KerckhoffsLabs.Runtime.InteropServices.Tests.PlatformLayout;
 
 namespace KerckhoffsLabs.Runtime.InteropServices.Tests;
 
@@ -135,4 +139,45 @@ public partial class NativeCULongTests
 
     [Fact]
     public void CreateTruncating_ToInt128_RoundTrips() => Assert.Equal((Int128)0xFFFFFFFFu, NumberBaseHelper<Int128>.CreateTruncating<NativeCULong>(new NativeCULong(0xFFFFFFFFu)));
+
+    //
+    // Targets that ulong.TryConvertFromXxx doesn't cover: ulong itself, and the floating-point
+    // types, which are converted on ulong's side. Each threw NotSupportedException before.
+    //
+
+    [Fact]
+    public void CreateChecked_ToULong_MaxValueRoundTrips() => Assert.Equal(Has32BitStorage ? uint.MaxValue : ulong.MaxValue, NumberBaseHelper<ulong>.CreateChecked<NativeCULong>(NativeCULong.MaxValue));
+
+    [Fact]
+    public void CreateSaturating_ToULong_MaxValueRoundTrips() => Assert.Equal(Has32BitStorage ? uint.MaxValue : ulong.MaxValue, NumberBaseHelper<ulong>.CreateSaturating<NativeCULong>(NativeCULong.MaxValue));
+
+    [Fact]
+    public void CreateTruncating_ToULong_MaxValueRoundTrips() => Assert.Equal(Has32BitStorage ? uint.MaxValue : ulong.MaxValue, NumberBaseHelper<ulong>.CreateTruncating<NativeCULong>(NativeCULong.MaxValue));
+
+    [Fact]
+    public void CreateChecked_ToDouble_RoundTrips() => Assert.Equal(4294967295.0, NumberBaseHelper<double>.CreateChecked<NativeCULong>(new NativeCULong(0xFFFFFFFFu)));
+
+    [Fact]
+    public void CreateSaturating_ToDouble_RoundTrips() => Assert.Equal(4294967295.0, NumberBaseHelper<double>.CreateSaturating<NativeCULong>(new NativeCULong(0xFFFFFFFFu)));
+
+    [Fact]
+    public void CreateTruncating_ToDouble_RoundTrips() => Assert.Equal(4294967295.0, NumberBaseHelper<double>.CreateTruncating<NativeCULong>(new NativeCULong(0xFFFFFFFFu)));
+
+    [Fact]
+    public void CreateChecked_ToSingle_RoundTrips() => Assert.Equal(65536.0f, NumberBaseHelper<float>.CreateChecked<NativeCULong>(new NativeCULong(0x10000u)));
+
+    [Fact]
+    public void CreateSaturating_ToSingle_RoundTrips() => Assert.Equal(65536.0f, NumberBaseHelper<float>.CreateSaturating<NativeCULong>(new NativeCULong(0x10000u)));
+
+    [Fact]
+    public void CreateTruncating_ToSingle_RoundTrips() => Assert.Equal(65536.0f, NumberBaseHelper<float>.CreateTruncating<NativeCULong>(new NativeCULong(0x10000u)));
+
+    [Fact]
+    public void CreateChecked_ToHalf_RoundTrips() => Assert.Equal((Half)1024, NumberBaseHelper<Half>.CreateChecked<NativeCULong>(new NativeCULong(1024u)));
+
+    [Fact]
+    public void CreateSaturating_ToHalf_RoundTrips() => Assert.Equal((Half)1024, NumberBaseHelper<Half>.CreateSaturating<NativeCULong>(new NativeCULong(1024u)));
+
+    [Fact]
+    public void CreateTruncating_ToHalf_RoundTrips() => Assert.Equal((Half)1024, NumberBaseHelper<Half>.CreateTruncating<NativeCULong>(new NativeCULong(1024u)));
 }

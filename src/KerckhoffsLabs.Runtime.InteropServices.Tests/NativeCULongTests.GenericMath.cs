@@ -316,6 +316,121 @@ public partial class NativeCULongTests
 #endif
     }
 
+    // The rest of the TryRead*Endian contract, as the BCL unsigned integers implement it: a shorter
+    // source is zero-extended, a longer one is accepted only when its extra high-order bytes are zero,
+    // and with isUnsigned false a set sign bit is a negative value, which an unsigned type can't hold.
+    // StorageSize is the width of the native storage: 4 bytes on Windows and 32-bit Unix, 8 elsewhere.
+    private static int StorageSize => Has32BitStorage ? 4 : 8;
+
+    [Fact]
+    public void TryReadBigEndian_EmptySource_ReadsZero()
+    {
+        Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian([], isUnsigned: true, out NativeCULong result));
+        Assert.Equal(new NativeCULong(0u), result);
+    }
+
+    [Fact]
+    public void TryReadBigEndian_ShorterSource_ZeroExtends()
+    {
+        Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian([0x01, 0x02], isUnsigned: true, out NativeCULong result));
+        Assert.Equal(new NativeCULong(0x0102u), result);
+    }
+
+    [Fact]
+    public void TryReadBigEndian_LongerSource_ZeroLeadingBytes_ReadsTrailingBytes()
+    {
+        byte[] source = new byte[StorageSize + 1];
+        source[^1] = 0x01;
+        Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian(source, isUnsigned: true, out NativeCULong result));
+        Assert.Equal(new NativeCULong(1u), result);
+    }
+
+    [Fact]
+    public void TryReadBigEndian_LongerSource_NonZeroLeadingByte_Fails()
+    {
+        byte[] source = new byte[StorageSize + 1];
+        source[0] = 0x01;
+        Assert.False(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian(source, isUnsigned: true, out _));
+    }
+
+    [Fact]
+    public void TryReadBigEndian_Signed_SignBitSet_Fails()
+    {
+        byte[] source = new byte[StorageSize];
+        source[0] = 0x80;
+        Assert.False(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian(source, isUnsigned: false, out _));
+        Assert.False(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian([0xFF], isUnsigned: false, out _));
+    }
+
+    [Fact]
+    public void TryReadBigEndian_Unsigned_SignBitSet_Reads()
+    {
+        Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian([0xFF], isUnsigned: true, out NativeCULong result));
+        Assert.Equal(new NativeCULong(0xFFu), result);
+    }
+
+    [Fact]
+    public void TryReadBigEndian_Signed_SignBitClear_Reads()
+    {
+        Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian([0x7F], isUnsigned: false, out NativeCULong result));
+        Assert.Equal(new NativeCULong(0x7Fu), result);
+    }
+
+    [Fact]
+    public void TryReadLittleEndian_EmptySource_ReadsZero()
+    {
+        Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian([], isUnsigned: true, out NativeCULong result));
+        Assert.Equal(new NativeCULong(0u), result);
+    }
+
+    [Fact]
+    public void TryReadLittleEndian_ShorterSource_ZeroExtends()
+    {
+        Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian([0x02, 0x01], isUnsigned: true, out NativeCULong result));
+        Assert.Equal(new NativeCULong(0x0102u), result);
+    }
+
+    [Fact]
+    public void TryReadLittleEndian_LongerSource_ZeroTrailingBytes_ReadsLeadingBytes()
+    {
+        byte[] source = new byte[StorageSize + 1];
+        source[0] = 0x01;
+        Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian(source, isUnsigned: true, out NativeCULong result));
+        Assert.Equal(new NativeCULong(1u), result);
+    }
+
+    [Fact]
+    public void TryReadLittleEndian_LongerSource_NonZeroTrailingByte_Fails()
+    {
+        byte[] source = new byte[StorageSize + 1];
+        source[0] = 0x01;
+        source[^1] = 0x01;
+        Assert.False(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian(source, isUnsigned: true, out _));
+    }
+
+    [Fact]
+    public void TryReadLittleEndian_Signed_SignBitSet_Fails()
+    {
+        byte[] source = new byte[StorageSize];
+        source[^1] = 0x80;
+        Assert.False(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian(source, isUnsigned: false, out _));
+        Assert.False(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian([0xFF], isUnsigned: false, out _));
+    }
+
+    [Fact]
+    public void TryReadLittleEndian_Unsigned_SignBitSet_Reads()
+    {
+        Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian([0xFF], isUnsigned: true, out NativeCULong result));
+        Assert.Equal(new NativeCULong(0xFFu), result);
+    }
+
+    [Fact]
+    public void TryReadLittleEndian_Signed_SignBitClear_Reads()
+    {
+        Assert.True(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian([0x7F], isUnsigned: false, out NativeCULong result));
+        Assert.Equal(new NativeCULong(0x7Fu), result);
+    }
+
     [Fact]
     public void TryWriteBigEndianTest()
     {
@@ -427,17 +542,13 @@ public partial class NativeCULongTests
     }
 
     //
-    // IBinaryInteger Read/Write Endian — error paths.
+    // IBinaryInteger Write Endian — error paths.
     // A 3-byte buffer is smaller than NativeCULong's storage on every platform
     // (4 bytes on Windows/32-bit Unix, 8 bytes on 64-bit Unix), so it hits the
     // < sizeof(NativeType) early-return branch in every implementation variant.
+    // A short source is not an error for the reads: it is zero-extended (see the
+    // TryRead*Endian_ShorterSource_ZeroExtends tests).
     //
-
-    [Fact]
-    public void TryReadBigEndian_SourceTooShort_ReturnsFalse() => Assert.False(BinaryIntegerHelper<NativeCULong>.TryReadBigEndian(new byte[3], isUnsigned: true, out NativeCULong _));
-
-    [Fact]
-    public void TryReadLittleEndian_SourceTooShort_ReturnsFalse() => Assert.False(BinaryIntegerHelper<NativeCULong>.TryReadLittleEndian(new byte[3], isUnsigned: true, out NativeCULong _));
 
     [Fact]
     public void TryWriteBigEndian_DestinationTooSmall_ReturnsFalse()
