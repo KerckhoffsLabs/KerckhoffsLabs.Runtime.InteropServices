@@ -42,6 +42,9 @@
     <!-- coverlet.collector is the VSTest-collector shim; MTP-native runs (dotnet test's coverage
          option) need coverlet's own MTP extension instead. -->
     <PackageReference Include="coverlet.MTP" Version="10.1.0" />
+    <!-- Property-based testing for NativeCULongDifferentialTests: generates inputs, and on a failure
+         shrinks them to a minimal case and reports the seed that reproduces it. -->
+    <PackageReference Include="CsCheck" Version="4.9.1" />
     <PackageReference Include="xunit.v3" Version="4.0.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="4.0.1" />
   </ItemGroup>
