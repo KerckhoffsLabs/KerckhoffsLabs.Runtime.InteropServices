@@ -2,6 +2,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Numerics;
 
 namespace KerckhoffsLabs.Runtime.InteropServices.Tests;
 
@@ -229,4 +230,49 @@ public partial class NativeCULongTests
         Assert.False(v.TryFormat(destination, out int written, default, CultureInfo.InvariantCulture));
         Assert.Equal(0, written);
     }
+
+    //
+    // Parse / TryParse — IUtf8SpanParsable<TSelf>
+    //
+
+    [Fact]
+    public void Parse_Utf8_DefaultStyle_RoundTrips() => Assert.Equal(new NativeCULong(42u), NativeCULong.Parse("42"u8, CultureInfo.InvariantCulture));
+
+    [Fact]
+    public void Parse_Utf8_HexStyle_RoundTrips() => Assert.Equal(new NativeCULong(0xFFu), NativeCULong.Parse("FF"u8, NumberStyles.HexNumber, CultureInfo.InvariantCulture));
+
+    [Fact]
+    public void Parse_Utf8_InvalidInput_ThrowsFormatException() => Assert.Throws<FormatException>(() => NativeCULong.Parse("not-a-number"u8, CultureInfo.InvariantCulture));
+
+    [Fact]
+    public void TryParse_Utf8_DefaultStyle_Success()
+    {
+        Assert.True(NativeCULong.TryParse("4294967295"u8, CultureInfo.InvariantCulture, out NativeCULong v));
+        Assert.Equal(new NativeCULong(0xFFFFFFFFu), v);
+    }
+
+    [Fact]
+    public void TryParse_Utf8_InvalidInput_ReturnsFalseAndDefault()
+    {
+        Assert.False(NativeCULong.TryParse("invalid"u8, NumberStyles.Integer, CultureInfo.InvariantCulture, out NativeCULong v));
+        Assert.Equal(default, v);
+    }
+
+    // fr-FR's group separator is a narrow no-break space (U+202F). The BCL's UTF-16 parser also accepts
+    // an ordinary space in its place, and its UTF-8 parser doesn't; NativeCULong's UTF-8 parse must give
+    // the storage type's UTF-8 answer, not the UTF-16 one that INumberBase's default implementation,
+    // which transcodes, would give.
+    [Fact]
+    public void TryParse_Utf8_FrenchOrdinarySpace_MatchesStorageTypeUtf8()
+    {
+        CultureInfo french = CultureInfo.GetCultureInfo("fr-FR");
+        bool expected = uint.TryParse("1 000"u8, NumberStyles.AllowThousands, french, out _);
+        Assert.Equal(expected, NativeCULong.TryParse("1 000"u8, NumberStyles.AllowThousands, french, out _));
+        Assert.Equal(expected, GenericTryParse<NativeCULong>("1 000"u8, NumberStyles.AllowThousands, french));
+    }
+
+    // Through INumberBase<T>, as generic code reaches it.
+    private static bool GenericTryParse<T>(ReadOnlySpan<byte> utf8Text, NumberStyles style, IFormatProvider provider)
+        where T : struct, INumberBase<T>
+        => T.TryParse(utf8Text, style, provider, out _);
 }
