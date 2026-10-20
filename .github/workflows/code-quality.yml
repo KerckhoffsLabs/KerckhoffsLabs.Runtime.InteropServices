@@ -57,6 +57,21 @@ jobs:
       - name: Restore
         run: dotnet restore src/KerckhoffsLabs.sln --locked-mode
 
+      # sonar.sourceEncoding is explicit because the scanner otherwise assumes the runner's default
+      # charset, which is not guaranteed to be UTF-8 and mis-decodes every source file containing a
+      # non-ASCII character (the em dashes and arrows in the doc comments). The repository is UTF-8 by
+      # construction — .editorconfig sets charset = utf-8 and the dotnet format gate enforces it — so
+      # this only tells the scanner what the files already are.
+      #
+      # docs/ is excluded: it is the DocFX site (Markdown, templates and binary images), none of it
+      # library code.
+      #
+      # The tests are excluded under both keys because the scanner sorts them two ways: the Tests
+      # project is detected as a test project, so its files are test sources filtered by
+      # sonar.test.exclusions, while tests/Integration is an ordinary executable (outside the solution
+      # the scan builds today) whose files would be main sources filtered by sonar.exclusions.
+      # Excluding only one key leaves the other half analyzed.
+      #
       # reportsPaths has a wildcard segment in the filename itself (coverage.opencover.*.xml, not a
       # literal coverage.opencover.xml): coverlet.MTP names its output coverage.opencover.<id>.xml.
       # A literal-filename glob silently matches nothing -- the scanner logs a WARN and imports
@@ -74,7 +89,10 @@ jobs:
           /k:"KerckhoffsLabs_KerckhoffsLabs.Runtime.InteropServices"
           /o:"kerckhoffslabs"
           /d:sonar.host.url="https://sonarcloud.io"
+          /d:sonar.sourceEncoding="UTF-8"
           /d:sonar.cs.opencover.reportsPaths="coverage/**/coverage.opencover.*.xml"
+          /d:sonar.exclusions="docs/**,tests/**,src/KerckhoffsLabs.Runtime.InteropServices.Tests/**"
+          /d:sonar.test.exclusions="tests/**,src/KerckhoffsLabs.Runtime.InteropServices.Tests/**"
           /d:sonar.issue.ignore.multicriteria="actionslock"
           /d:sonar.issue.ignore.multicriteria.actionslock.ruleKey="githubactions:S7637"
           /d:sonar.issue.ignore.multicriteria.actionslock.resourceKey=".github/workflows/*.yml"
