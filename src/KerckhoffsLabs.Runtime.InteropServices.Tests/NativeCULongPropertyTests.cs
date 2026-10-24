@@ -283,8 +283,11 @@ public sealed class NativeCULongPropertyTests
     {
         Assert.False(x.Equals((object)x.Value));
         Assert.False(x.Equals((object)(ulong)x));
-        Assert.False(x.Equals(null));
-        Assert.Equal(1, x.CompareTo(null));
+        // Through a variable: Equals(object) must answer null with false, which is what this checks,
+        // and a literal null would be flagged as a comparison that can never be true.
+        object? none = null;
+        Assert.False(x.Equals(none));
+        Assert.Equal(1, x.CompareTo(none));
         Assert.Throws<ArgumentException>(() => x.CompareTo((object)(ulong)x));
     }
 
