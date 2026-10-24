@@ -830,12 +830,13 @@ public readonly struct NativeCULong
     {
         ulong v = (ulong)value._value;
 
-        // Ulong is non-negative, so only the upper bound can saturate.
-        if (typeof(TOther) == typeof(sbyte)) { sbyte r = v > (ulong)sbyte.MaxValue ? sbyte.MaxValue : (sbyte)v; result = (TOther)(object)r; return true; }
-        if (typeof(TOther) == typeof(short)) { short r = v > (ulong)short.MaxValue ? short.MaxValue : (short)v; result = (TOther)(object)r; return true; }
-        if (typeof(TOther) == typeof(int)) { int r = v > int.MaxValue ? int.MaxValue : (int)v; result = (TOther)(object)r; return true; }
-        if (typeof(TOther) == typeof(long)) { long r = v > long.MaxValue ? long.MaxValue : (long)v; result = (TOther)(object)r; return true; }
-        if (typeof(TOther) == typeof(nint)) { nint r = v > (ulong)nint.MaxValue ? nint.MaxValue : (nint)v; result = (TOther)(object)r; return true; }
+        // Ulong is non-negative, so only the upper bound can saturate: the value is capped at the target's
+        // maximum, and then always fits.
+        if (typeof(TOther) == typeof(sbyte)) { sbyte r = (sbyte)Math.Min(v, (ulong)sbyte.MaxValue); result = (TOther)(object)r; return true; }
+        if (typeof(TOther) == typeof(short)) { short r = (short)Math.Min(v, (ulong)short.MaxValue); result = (TOther)(object)r; return true; }
+        if (typeof(TOther) == typeof(int)) { int r = (int)Math.Min(v, int.MaxValue); result = (TOther)(object)r; return true; }
+        if (typeof(TOther) == typeof(long)) { long r = (long)Math.Min(v, long.MaxValue); result = (TOther)(object)r; return true; }
+        if (typeof(TOther) == typeof(nint)) { nint r = (nint)Math.Min(v, (ulong)nint.MaxValue); result = (TOther)(object)r; return true; }
         if (typeof(TOther) == typeof(Int128)) { Int128 r = v; result = (TOther)(object)r; return true; }
 
         return ConvertULongToSaturating(v, out result);
