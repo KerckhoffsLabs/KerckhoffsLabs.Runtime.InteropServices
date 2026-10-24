@@ -45,6 +45,10 @@
     <!-- Property-based testing for NativeCULongDifferentialTests: generates inputs, and on a failure
          shrinks them to a minimal case and reports the seed that reproduces it. -->
     <PackageReference Include="CsCheck" Version="4.9.1" />
+    <!-- Property-based testing for NativeCULongPropertyTests: laws that hold across members (round trips,
+         identities, the CULong layout) rather than agreement with an oracle, and the members reached only
+         through generic math. -->
+    <PackageReference Include="FsCheck.Xunit.v3" Version="3.5.0" />
     <PackageReference Include="xunit.v3" Version="4.0.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="4.0.1" />
   </ItemGroup>
