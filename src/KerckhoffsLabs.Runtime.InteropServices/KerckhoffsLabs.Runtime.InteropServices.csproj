@@ -9,11 +9,12 @@
     <EnableAotAnalyzer>true</EnableAotAnalyzer>
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
     <!-- IsAotCompatible makes the SDK add Microsoft.NET.ILLink.Tasks, which packages.lock.json records at
-         the version of the SDK that restored it. CI therefore installs one exact SDK (dotnet-version in
-         the workflows) and restores in locked mode against lock files generated with that SDK. To move
-         to a newer SDK, change dotnet-version in every workflow, then, with that SDK installed, run
-         `dotnet restore src/KerckhoffsLabs.sln` with its force-evaluate switch to regenerate the lock
-         files; commit both together. -->
+         the version of the SDK that restored it. global.json therefore names one exact SDK, with
+         rollForward "patch" so that a newer SDK preinstalled on a CI runner is not picked over it, and
+         every workflow installs that SDK from global.json and restores in locked mode against lock files
+         generated with it. To move to a newer SDK, change the version in global.json, then, with that
+         SDK installed, run `dotnet restore src/KerckhoffsLabs.sln` with its force-evaluate switch to
+         regenerate the lock files; commit both together. -->
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <LangVersion>13.0</LangVersion>
@@ -83,7 +84,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.402" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.403" PrivateAssets="all" />
   </ItemGroup>
 
   <!-- On the outer (wide) pack, also emit the narrow (uint) build under runtimes/win-*/lib.

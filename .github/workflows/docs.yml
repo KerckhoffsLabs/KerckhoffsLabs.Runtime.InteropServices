@@ -36,7 +36,7 @@ jobs:
 
       - uses: actions/setup-dotnet@v6.0.0
         with:
-          dotnet-version: '10.0.402' # exact SDK: the lock files record its ILLink.Tasks (see the library's .csproj)
+          global-json-file: global.json # exact SDK: the lock files record its ILLink.Tasks (see the library's .csproj)
 
       # Pinned for the same reason as the scanner in code-quality.yml: an unpinned tool floats to
       # latest per run, and the site builds with --warningsAsErrors, so a docfx change that emits a
