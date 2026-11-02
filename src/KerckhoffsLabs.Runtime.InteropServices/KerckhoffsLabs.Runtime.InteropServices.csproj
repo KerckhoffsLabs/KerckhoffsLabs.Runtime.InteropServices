@@ -17,7 +17,7 @@
          regenerate the lock files; commit both together. -->
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
-    <LangVersion>13.0</LangVersion>
+    <LangVersion>14.0</LangVersion>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
   </PropertyGroup>
 
