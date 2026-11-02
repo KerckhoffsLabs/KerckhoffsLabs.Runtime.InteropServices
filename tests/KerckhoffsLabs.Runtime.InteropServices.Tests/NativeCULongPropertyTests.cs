@@ -45,6 +45,70 @@ public static class NativeCULongArbitraries
     /// <summary>Any value at all, as the text and endianness properties take it.</summary>
     public static Arbitrary<ulong> UInt64Bits() => Arb.From(Bits, UInt64.Shrinker);
 
+    // FsCheck 3.6's own Int128, UInt128 and Half arbitraries. Their generators are sized (small values
+    // only, within -size..size), so the values below add the whole range and the edges; their shrinkers
+    // are kept as they are.
+    private static readonly Arbitrary<Int128> Int128Default = ArbMap.Default.ArbFor<Int128>();
+    private static readonly Arbitrary<UInt128> UInt128Default = ArbMap.Default.ArbFor<UInt128>();
+    private static readonly Arbitrary<Half> HalfDefault = ArbMap.Default.ArbFor<Half>();
+
+    // 0, 1, 2, and 2^n - 1, 2^n, 2^n + 1 around the top bit and the width of either storage width and of
+    // the 128-bit types, then the top of UInt128.
+    private static readonly UInt128[] UInt128Edges =
+    [
+        0, 1, 2,
+        .. new[] { 31, 32, 63, 64, 127 }.SelectMany(n => new[] { (UInt128.One << n) - 1, UInt128.One << n, (UInt128.One << n) + 1 }),
+        UInt128.MaxValue - 1, UInt128.MaxValue,
+    ];
+
+    // The same magnitudes with either sign, where they fit, then Int128.MinValue (2^127 - 1 is
+    // Int128.MaxValue, and its negation Int128.MinValue + 1).
+    private static readonly Int128[] Int128Edges =
+    [
+        .. UInt128Edges.Where(u => u <= (UInt128)Int128.MaxValue).SelectMany(u => new[] { (Int128)u, -(Int128)u }),
+        Int128.MinValue,
+    ];
+
+    // Signed zeros, the subnormals' ends, the largest values below 1 in magnitude (which truncate to zero),
+    // ±1 and ±1.5, the last integers Half holds exactly, MaxValue and MinValue, NaN and the infinities.
+    private static readonly Half[] HalfEdges =
+    [
+        Half.Zero, Half.NegativeZero, Half.Epsilon, BitConverter.UInt16BitsToHalf(0x03FF), BitConverter.UInt16BitsToHalf(0x0400),
+        BitConverter.UInt16BitsToHalf(0x3BFF), BitConverter.UInt16BitsToHalf(0xBBFF), (Half)0.5, (Half)(-0.5),
+        Half.One, Half.NegativeOne, (Half)1.5, (Half)(-1.5), (Half)2048, (Half)2050, Half.MaxValue, Half.MinValue,
+        Half.NaN, Half.PositiveInfinity, Half.NegativeInfinity,
+    ];
+
+    /// <summary>Any UInt128: uniform over the whole range, the 64-bit patterns above, small values, and the
+    /// edges; shrinking with FsCheck's own UInt128 shrinker.</summary>
+    public static Arbitrary<UInt128> AnyUInt128() => Arb.From(
+        Gen.Frequency(
+            (3, ArbMap.Default.ArbFor<DoNotSize<UInt128>>().Generator.Select(v => v.Item)),
+            (3, Bits.Select(b => (UInt128)b)),
+            (1, UInt128Default.Generator),
+            (3, Gen.Elements(UInt128Edges))),
+        UInt128Default.Shrinker);
+
+    /// <summary>Any Int128: uniform over the whole range, the 64-bit patterns above zero- and sign-extended,
+    /// small values, and the edges; shrinking with FsCheck's own Int128 shrinker.</summary>
+    public static Arbitrary<Int128> AnyInt128() => Arb.From(
+        Gen.Frequency(
+            (3, ArbMap.Default.ArbFor<DoNotSize<Int128>>().Generator.Select(v => v.Item)),
+            (2, Bits.Select(b => (Int128)b)),
+            (1, Bits.Select(b => (Int128)unchecked((long)b))),
+            (1, Int128Default.Generator),
+            (3, Gen.Elements(Int128Edges))),
+        Int128Default.Shrinker);
+
+    /// <summary>Any Half: FsCheck's own (small values with fractions, now and then NaN, an infinity or a
+    /// subnormal), uniform over every bit pattern, and the edges; shrinking with FsCheck's own Half shrinker.</summary>
+    public static Arbitrary<Half> AnyHalf() => Arb.From(
+        Gen.Frequency(
+            (3, HalfDefault.Generator),
+            (3, Gen.Choose(0, ushort.MaxValue).Select(bits => BitConverter.UInt16BitsToHalf((ushort)bits))),
+            (2, Gen.Elements(HalfEdges))),
+        HalfDefault.Shrinker);
+
     /// <summary>Built through the constructor, the most direct way to set the storage, so that no
     /// conversion under test is involved.</summary>
     internal static NativeCULong Subject(ulong bits) =>
@@ -409,27 +473,104 @@ public sealed class NativeCULongPropertyTests
     // saturated at the bounds, or refused when checked.
     //
 
+    // Max and the modulus follow Width, so on 32-bit storage everything from 2^32 up is out of range, and
+    // the generator puts values on both sides of 2^32 and of 2^64.
     [Property]
-    public void Create_FromUInt128_AgreesWithTheTrueValue(ulong high, ulong low)
+    public void Create_FromUInt128_AgreesWithTheTrueValue(UInt128 v)
     {
-        UInt128 v = new(high >> (Width == 32 ? 30 : 0), low);
         UInt128 modulus = UInt128.One << Width;
 
         Assert.Equal((ulong)(v % modulus), (ulong)NativeCULong.CreateTruncating(v));
         Assert.Equal(v > Max ? Max : (ulong)v, (ulong)NativeCULong.CreateSaturating(v));
         if (v > Max)
+        {
             Assert.Throws<OverflowException>(() => NativeCULong.CreateChecked(v));
+        }
         else
+        {
             Assert.Equal((ulong)v, (ulong)NativeCULong.CreateChecked(v));
+            Assert.Equal(v, UInt128.CreateChecked(NativeCULong.CreateChecked(v)));
+        }
     }
 
-    // Every value survives a trip through a wider or exact type and back.
+    [Property]
+    public void Create_FromInt128_AgreesWithTheTrueValue(Int128 v)
+    {
+        UInt128 modulus = UInt128.One << Width;
+
+        // 2^128 is a multiple of 2^Width, so the two's-complement bit pattern has the value's residue.
+        Assert.Equal((ulong)(unchecked((UInt128)v) % modulus), (ulong)NativeCULong.CreateTruncating(v));
+        Assert.Equal(v < 0 ? 0UL : v > Max ? Max : (ulong)v, (ulong)NativeCULong.CreateSaturating(v));
+        if (v < 0 || v > Max)
+        {
+            Assert.Throws<OverflowException>(() => NativeCULong.CreateChecked(v));
+        }
+        else
+        {
+            Assert.Equal((ulong)v, (ulong)NativeCULong.CreateChecked(v));
+            Assert.Equal(v, Int128.CreateChecked(NativeCULong.CreateChecked(v)));
+        }
+    }
+
+    // A Half is truncated toward zero, then range-checked: -0.5 is 0, but -1.5 is out of range. Every finite
+    // Half is below 2^16, so only the negatives, NaN and the infinities are out of range at either width,
+    // and saturating sends NaN and the negatives to 0 and +∞ to Max. Truncating saturates too: since .NET 9
+    // floating-point to integer conversions saturate on every platform, which is what uint and ulong do.
+    [Property]
+    public void Create_FromHalf_TruncatesTowardZero(Half h)
+    {
+        double d = (double)h; // exact
+        double truncated = Math.Truncate(d);
+        ulong saturated = double.IsNaN(d) || truncated <= 0 ? 0 : d > Max ? Max : (ulong)truncated;
+
+        Assert.Equal(saturated, (ulong)NativeCULong.CreateSaturating(h));
+        Assert.Equal(saturated, (ulong)NativeCULong.CreateTruncating(h));
+        if (double.IsFinite(d) && truncated >= 0)
+            Assert.Equal((ulong)truncated, (ulong)NativeCULong.CreateChecked(h));
+        else
+            Assert.Throws<OverflowException>(() => NativeCULong.CreateChecked(h));
+    }
+
+    // Int128 and UInt128 hold every value, so every conversion out and back is the identity.
+    [Property]
+    public void Create_RoundTripsThrough128BitTypes(NativeCULong x)
+    {
+        Assert.Equal(x, NativeCULong.CreateChecked(Int128.CreateChecked(x)));
+        Assert.Equal(x, NativeCULong.CreateSaturating(Int128.CreateSaturating(x)));
+        Assert.Equal(x, NativeCULong.CreateTruncating(Int128.CreateTruncating(x)));
+        Assert.Equal(x, NativeCULong.CreateChecked(UInt128.CreateChecked(x)));
+        Assert.Equal(x, NativeCULong.CreateSaturating(UInt128.CreateSaturating(x)));
+        Assert.Equal(x, NativeCULong.CreateTruncating(UInt128.CreateTruncating(x)));
+    }
+
+    // A value Half holds exactly (an integer of at most 11 significant bits, up to Half.MaxValue = 65504)
+    // comes back unchanged; a non-negative integral Half survives the trip the other way. x seldom lands on
+    // such a value above 300, so the value h converts to is tried as well.
+    [Property]
+    public void Create_RoundTripsThroughHalf_WhenExact(NativeCULong x, Half h)
+    {
+        foreach (NativeCULong value in new[] { x, NativeCULong.CreateSaturating(h) })
+        {
+            if (!IsExactInHalf((ulong)value))
+                continue;
+
+            Assert.Equal(value, NativeCULong.CreateChecked(Half.CreateChecked(value)));
+            Assert.Equal(value, NativeCULong.CreateSaturating(Half.CreateSaturating(value)));
+            Assert.Equal(value, NativeCULong.CreateTruncating(Half.CreateTruncating(value)));
+        }
+
+        if (Half.IsFinite(h) && Half.IsInteger(h) && h >= Half.Zero)
+            Assert.Equal(h, Half.CreateChecked(NativeCULong.CreateChecked(h)));
+
+        static bool IsExactInHalf(ulong a) =>
+            a == 0 || (a <= 65504 && a >> BitOperations.TrailingZeroCount(a) < 2048);
+    }
+
+    // Every value survives a trip through a wider or exact type and back (Int128 and UInt128 above).
     [Property]
     public void Create_RoundTripsThroughExactTypes(NativeCULong x)
     {
         Assert.Equal(x, NativeCULong.CreateChecked(ulong.CreateChecked(x)));
-        Assert.Equal(x, NativeCULong.CreateChecked(UInt128.CreateChecked(x)));
-        Assert.Equal(x, NativeCULong.CreateChecked(Int128.CreateChecked(x)));
         Assert.Equal(x, NativeCULong.CreateChecked(decimal.CreateChecked(x)));
         Assert.Equal(x, NativeCULong.CreateChecked(nuint.CreateChecked(x)));
         if ((ulong)x <= 1UL << 53)
