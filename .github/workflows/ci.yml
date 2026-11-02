@@ -19,9 +19,9 @@ jobs:
         with:
           global-json-file: global.json # exact SDK: the lock files record its ILLink.Tasks (see the library's .csproj)
 
-      - run: dotnet restore src/KerckhoffsLabs.sln --locked-mode
+      - run: dotnet restore KerckhoffsLabs.sln --locked-mode
 
-      - run: dotnet format src/KerckhoffsLabs.sln --verify-no-changes --no-restore
+      - run: dotnet format KerckhoffsLabs.sln --verify-no-changes --no-restore
 
   build-and-test:
     name: ${{ matrix.os }}${{ matrix.arch == 'x86' && ' (x86)' || '' }}
@@ -53,16 +53,16 @@ jobs:
           architecture: ${{ matrix.arch }}
 
       - name: Restore
-        run: dotnet restore src/KerckhoffsLabs.sln --locked-mode
+        run: dotnet restore KerckhoffsLabs.sln --locked-mode
 
       # The library is single-target net10.0; the WINDOWS storage build is selected by
       # $(NativeCULongNarrow), not a TFM. Run the suite in both modes so each NativeCULong
       # layout (nuint and uint) is exercised regardless of host OS.
       - name: Test (wide / nuint)
-        run: dotnet test --solution src/KerckhoffsLabs.sln --no-restore -c Release --output Detailed
+        run: dotnet test --solution KerckhoffsLabs.sln --no-restore -c Release --output Detailed
 
       - name: Test (narrow / uint)
-        run: dotnet test --solution src/KerckhoffsLabs.sln --no-restore -c Release -p:NativeCULongNarrow=true --output Detailed
+        run: dotnet test --solution KerckhoffsLabs.sln --no-restore -c Release -p:NativeCULongNarrow=true --output Detailed
 
   integration:
     name: integration-${{ matrix.os }}

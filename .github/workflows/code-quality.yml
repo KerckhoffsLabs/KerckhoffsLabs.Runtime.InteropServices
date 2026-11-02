@@ -55,7 +55,7 @@ jobs:
         run: dotnet tool install --global dotnet-sonarscanner --version 12.0.0
 
       - name: Restore
-        run: dotnet restore src/KerckhoffsLabs.sln --locked-mode
+        run: dotnet restore KerckhoffsLabs.sln --locked-mode
 
       # sonar.sourceEncoding is explicit because the scanner otherwise assumes the runner's default
       # charset, which is not guaranteed to be UTF-8 and mis-decodes every source file containing a
@@ -66,11 +66,11 @@ jobs:
       # docs/ is excluded: it is the DocFX site (Markdown, templates and binary images), none of it
       # library code.
       #
-      # The tests are excluded under both keys because the scanner sorts them two ways: the Tests
+      # tests/ is excluded under both keys because the scanner sorts its projects two ways: the Tests
       # project is detected as a test project, so its files are test sources filtered by
-      # sonar.test.exclusions, while tests/Integration is an ordinary executable (outside the solution
-      # the scan builds today) whose files would be main sources filtered by sonar.exclusions.
-      # Excluding only one key leaves the other half analyzed.
+      # sonar.test.exclusions, while tests/Integration is an ordinary executable (built with the
+      # solution, against the library project) whose files would be main sources filtered by
+      # sonar.exclusions. Excluding only one key leaves the other half analyzed.
       #
       # reportsPaths has a wildcard segment in the filename itself (coverage.opencover.*.xml, not a
       # literal coverage.opencover.xml): coverlet.MTP names its output coverage.opencover.<id>.xml.
@@ -91,14 +91,14 @@ jobs:
           /d:sonar.host.url="https://sonarcloud.io"
           /d:sonar.sourceEncoding="UTF-8"
           /d:sonar.cs.opencover.reportsPaths="coverage/**/coverage.opencover.*.xml"
-          /d:sonar.exclusions="docs/**,tests/**,src/KerckhoffsLabs.Runtime.InteropServices.Tests/**"
-          /d:sonar.test.exclusions="tests/**,src/KerckhoffsLabs.Runtime.InteropServices.Tests/**"
+          /d:sonar.exclusions="docs/**,tests/**"
+          /d:sonar.test.exclusions="tests/**"
           /d:sonar.issue.ignore.multicriteria="actionslock"
           /d:sonar.issue.ignore.multicriteria.actionslock.ruleKey="githubactions:S7637"
           /d:sonar.issue.ignore.multicriteria.actionslock.resourceKey=".github/workflows/*.yml"
 
       - name: Build
-        run: dotnet build src/KerckhoffsLabs.sln --no-restore -c Release -p:UseMicrosoftTestingPlatformRunner=true
+        run: dotnet build KerckhoffsLabs.sln --no-restore -c Release -p:UseMicrosoftTestingPlatformRunner=true
 
       # Cover both NativeCULong layouts so Sonar sees the #if WINDOWS branch too: the
       # wide (nuint) build reuses the Build above; the narrow (uint) build is selected
@@ -108,13 +108,13 @@ jobs:
       # is built and executed once instead of duplicated across a separate workflow.
       - name: Test with coverage (wide / nuint)
         run: >
-          dotnet test --solution src/KerckhoffsLabs.sln --no-build -c Release
+          dotnet test --solution KerckhoffsLabs.sln --no-build -c Release
           --results-directory ./coverage --output Detailed
           -- --coverlet --coverlet-output-format opencover --coverlet-output-format cobertura
 
       - name: Test with coverage (narrow / uint)
         run: >
-          dotnet test --solution src/KerckhoffsLabs.sln --no-restore -c Release -p:NativeCULongNarrow=true
+          dotnet test --solution KerckhoffsLabs.sln --no-restore -c Release -p:NativeCULongNarrow=true
           -p:UseMicrosoftTestingPlatformRunner=true
           --results-directory ./coverage --output Detailed
           -- --coverlet --coverlet-output-format opencover --coverlet-output-format cobertura

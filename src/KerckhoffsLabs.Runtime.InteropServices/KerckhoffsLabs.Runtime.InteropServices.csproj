@@ -13,7 +13,7 @@
          rollForward "patch" so that a newer SDK preinstalled on a CI runner is not picked over it, and
          every workflow installs that SDK from global.json and restores in locked mode against lock files
          generated with it. To move to a newer SDK, change the version in global.json, then, with that
-         SDK installed, run `dotnet restore src/KerckhoffsLabs.sln` with its force-evaluate switch to
+         SDK installed, run `dotnet restore KerckhoffsLabs.sln` with its force-evaluate switch to
          regenerate the lock files; commit both together. -->
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
