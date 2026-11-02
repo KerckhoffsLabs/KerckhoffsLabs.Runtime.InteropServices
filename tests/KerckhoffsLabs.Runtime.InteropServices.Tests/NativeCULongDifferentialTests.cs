@@ -29,7 +29,7 @@ public sealed class NativeCULongDifferentialTests
     private static readonly Gen<ulong> GenBits = Gen.Frequency(
         (4, Gen.ULong),
         (2, Gen.ULong[0, 300]),
-        (3, Gen.OneOfConst(
+        (3, Gen.OneOf(
             0UL, 1UL, 2UL, 0x7FUL, 0x80UL, 0xFFUL, 0x7FFF_FFFFUL, 0x8000_0000UL, 0xFFFF_FFFEUL, 0xFFFF_FFFFUL,
             0x1_0000_0000UL, 0x7FFF_FFFF_FFFF_FFFFUL, 0x8000_0000_0000_0000UL, ulong.MaxValue - 1, ulong.MaxValue)));
 
@@ -39,14 +39,14 @@ public sealed class NativeCULongDifferentialTests
         (3, Gen.Double),
         (2, GenBits.Select(b => (double)b)),
         (2, Gen.Double[-1e20, 1e20]),
-        (2, Gen.OneOfConst(
+        (2, Gen.OneOf(
             double.NaN, double.PositiveInfinity, double.NegativeInfinity, double.Epsilon, -0.0, 0.5, -0.5, -1.0,
             4294967295.5, 4294967296.0, 18446744073709551615.0, 1.8446744073709552E19, double.MaxValue, double.MinValue)));
 
     private static readonly Gen<decimal> GenDecimal = Gen.Frequency(
         (3, Gen.Decimal),
         (2, GenBits.Select(b => (decimal)b)),
-        (1, Gen.OneOfConst(decimal.MinValue, decimal.MaxValue, -1m, -0.5m, 0.5m, 4294967295.5m, 18446744073709551615.5m)));
+        (1, Gen.OneOf(decimal.MinValue, decimal.MaxValue, -1m, -0.5m, 0.5m, 4294967295.5m, 18446744073709551615.5m)));
 
     private static readonly CultureInfo[] Cultures =
     [
@@ -57,10 +57,10 @@ public sealed class NativeCULongDifferentialTests
         CultureInfo.GetCultureInfo("ar-EG"),
     ];
 
-    private static readonly Gen<CultureInfo> GenCulture = Gen.OneOfConst(Cultures);
+    private static readonly Gen<CultureInfo> GenCulture = Gen.OneOf(Cultures);
 
     // Valid and invalid styles alike: an invalid combination must throw ArgumentException both ways.
-    private static readonly Gen<NumberStyles> GenStyle = Gen.OneOfConst(
+    private static readonly Gen<NumberStyles> GenStyle = Gen.OneOf(
         NumberStyles.None, NumberStyles.Integer, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite,
         NumberStyles.AllowLeadingSign, NumberStyles.AllowTrailingSign, NumberStyles.AllowParentheses,
         NumberStyles.AllowThousands, NumberStyles.AllowDecimalPoint, NumberStyles.AllowExponent,
@@ -76,11 +76,11 @@ public sealed class NativeCULongDifferentialTests
         (3, GenBits.Select(b => b.ToString(CultureInfo.InvariantCulture))),
         (1, GenBits.Select(b => b.ToString("X", CultureInfo.InvariantCulture))),
         (1, GenBits.Select(b => b.ToString("N0", CultureInfo.GetCultureInfo("fr-FR")))),
-        (2, Gen.OneOfConst(
+        (2, Gen.OneOf(
             "", " ", "-0", "+0", "-1", "0x10", "1_000", "4294967295", "4294967296", "18446744073709551615",
             "18446744073709551616", "1,000", "1 000", "1e3", "1E+3", "1.0", "1.5", "(1)", "$1", "1-", " 42 ", "١٢")));
 
-    private static readonly Gen<string?> GenFormat = Gen.OneOfConst<string?>(
+    private static readonly Gen<string?> GenFormat = Gen.OneOf<string?>(
         null, "", "D", "d", "D0", "D3", "D25", "X", "x", "X0", "X17", "N", "N0", "N3", "n", "C", "C0", "E", "e2",
         "G", "G0", "G3", "G25", "F", "F0", "F3", "P", "P0", "B", "b", "B40", "R", "0", "0000", "#,##0.00", "#",
         "%", "0;(0);zero", "Z", "D1000000000");
