@@ -13,8 +13,7 @@ Out of scope:
 
 - native libraries called through the package's types: report those to their maintainers;
 - findings that require an already-compromised host;
-- code under `src/KerckhoffsLabs.Runtime.InteropServices.Tests` and `tests/`, which does not ship,
-  unless it compromises the release pipeline.
+- code under `tests/`, which does not ship, unless it compromises the release pipeline.
 
 ## Reporting a vulnerability
 

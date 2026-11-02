@@ -9,11 +9,15 @@ version: 2
 # security update arrives in a pull request of its own: one group takes the weekly bump, the other
 # whatever security opens.
 updates:
-  # The solution under src/. Its projects restore from packages.lock.json in locked mode, and
-  # Dependabot updates the lock files with the version. tests/Integration is left out on purpose:
-  # it is not in the solution and floats (Version="*") on the package CI packs into a local feed.
+  # The library and its test project. They restore from packages.lock.json in locked mode, and
+  # Dependabot updates the lock files with the version. They are listed by directory rather than
+  # through KerckhoffsLabs.sln at the root so that tests/Integration stays out on purpose: it has no
+  # package dependency of its own and, built on its own, floats (Version="*") on the package CI
+  # packs into a local feed that does not exist here.
   - package-ecosystem: nuget
-    directory: /src
+    directories:
+      - /src/KerckhoffsLabs.Runtime.InteropServices
+      - /tests/KerckhoffsLabs.Runtime.InteropServices.Tests
     schedule:
       interval: weekly
     cooldown:
