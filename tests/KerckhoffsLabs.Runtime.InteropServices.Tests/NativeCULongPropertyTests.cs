@@ -549,11 +549,8 @@ public sealed class NativeCULongPropertyTests
     [Property]
     public void Create_RoundTripsThroughHalf_WhenExact(NativeCULong x, Half h)
     {
-        foreach (NativeCULong value in new[] { x, NativeCULong.CreateSaturating(h) })
+        foreach (NativeCULong value in new[] { x, NativeCULong.CreateSaturating(h) }.Where(v => IsExactInHalf((ulong)v)))
         {
-            if (!IsExactInHalf((ulong)value))
-                continue;
-
             Assert.Equal(value, NativeCULong.CreateChecked(Half.CreateChecked(value)));
             Assert.Equal(value, NativeCULong.CreateSaturating(Half.CreateSaturating(value)));
             Assert.Equal(value, NativeCULong.CreateTruncating(Half.CreateTruncating(value)));
