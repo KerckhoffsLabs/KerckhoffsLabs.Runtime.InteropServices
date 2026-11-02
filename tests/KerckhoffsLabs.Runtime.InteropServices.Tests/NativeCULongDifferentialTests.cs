@@ -395,8 +395,13 @@ public sealed class NativeCULongDifferentialTests
             From<TOracle, ulong>(GenBits);
             From<TOracle, nint>(GenBits.Select(b => unchecked((nint)(long)b)));
             From<TOracle, nuint>(GenBits.Select(b => unchecked((nuint)b)));
-            From<TOracle, Int128>(Gen.Select(GenBits, GenBits).Select((upper, lower) => new Int128(upper, lower)));
-            From<TOracle, UInt128>(Gen.Select(GenBits, GenBits).Select((upper, lower) => new UInt128(upper, lower)));
+            // Mostly two edge-biased halves; CsCheck's own generators cover the whole range evenly as well.
+            From<TOracle, Int128>(Gen.Frequency(
+                (3, Gen.Select(GenBits, GenBits).Select((upper, lower) => new Int128(upper, lower))),
+                (1, Gen.Int128)));
+            From<TOracle, UInt128>(Gen.Frequency(
+                (3, Gen.Select(GenBits, GenBits).Select((upper, lower) => new UInt128(upper, lower))),
+                (1, Gen.UInt128)));
             From<TOracle, decimal>(GenDecimal);
             From<TOracle, double>(GenDouble);
             From<TOracle, float>(GenDouble.Select(d => (float)d));
