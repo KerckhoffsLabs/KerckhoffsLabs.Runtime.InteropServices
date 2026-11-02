@@ -68,9 +68,9 @@ jobs:
       #
       # tests/ is excluded under both keys because the scanner sorts its projects two ways: the Tests
       # project is detected as a test project, so its files are test sources filtered by
-      # sonar.test.exclusions, while tests/Integration is an ordinary executable (outside the solution
-      # the scan builds today) whose files would be main sources filtered by sonar.exclusions.
-      # Excluding only one key leaves the other half analyzed.
+      # sonar.test.exclusions, while tests/Integration is an ordinary executable (built with the
+      # solution, against the library project) whose files would be main sources filtered by
+      # sonar.exclusions. Excluding only one key leaves the other half analyzed.
       #
       # reportsPaths has a wildcard segment in the filename itself (coverage.opencover.*.xml, not a
       # literal coverage.opencover.xml): coverlet.MTP names its output coverage.opencover.<id>.xml.

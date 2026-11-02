@@ -8,10 +8,32 @@
     <!-- Deliberately NO RuntimeIdentifier / no -windows TFM: a plain, portable consumer. -->
   </PropertyGroup>
 
-  <ItemGroup>
+  <!-- SolutionDir is the one signal every solution-level tool gives a project as a global
+       property: `dotnet build|test` on the solution, the solution restore, and the MSBuildWorkspace
+       `dotnet format` loads the solution into (which passes no SolutionFileName). Built on its own,
+       it is unset here: the common targets give it the placeholder "*Undefined*", but they are
+       imported after this file. Test for both anyway, so a reorder of the imports cannot quietly
+       turn the standalone run into a project reference. -->
+  <PropertyGroup>
+    <_BuiltFromSolution>false</_BuiltFromSolution>
+    <_BuiltFromSolution Condition="'$(SolutionDir)' != '' and '$(SolutionDir)' != '*Undefined*'">true</_BuiltFromSolution>
+  </PropertyGroup>
+
+  <!-- Built on its own (`cd tests/Integration && dotnet run|publish`, as the CI integration job
+       does), this project consumes the PACKED package: that is the whole point of it. -->
+  <ItemGroup Condition="'$(_BuiltFromSolution)' != 'true'">
     <!-- Float to whatever the CI step just packed into the local feed (the only source mapped
          for this package), so neither side hardcodes a version. -->
     <PackageReference Include="KerckhoffsLabs.Runtime.InteropServices" Version="*" />
+  </ItemGroup>
+
+  <!-- Built as part of KerckhoffsLabs.sln, there is no packed feed to restore from on a fresh
+       clone, so it references the library project instead. That keeps `dotnet restore`,
+       `dotnet build`, `dotnet test` and `dotnet format` on the solution working before anything
+       has been packed, and keeps Program.cs compiled and style-checked with the rest. It proves
+       nothing about the package: only the standalone run above does. -->
+  <ItemGroup Condition="'$(_BuiltFromSolution)' == 'true'">
+    <ProjectReference Include="../../src/KerckhoffsLabs.Runtime.InteropServices/KerckhoffsLabs.Runtime.InteropServices.csproj" />
   </ItemGroup>
 
 </Project>
