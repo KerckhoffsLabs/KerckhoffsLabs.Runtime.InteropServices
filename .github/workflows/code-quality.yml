@@ -34,7 +34,7 @@ jobs:
           fetch-depth: 0  # Sonar needs full history for new-code detection and blame
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v6.0.0
+        uses: actions/setup-dotnet@v6.1.0
         with:
           global-json-file: global.json # exact SDK: the lock files record its ILLink.Tasks (see the library's .csproj)
 
