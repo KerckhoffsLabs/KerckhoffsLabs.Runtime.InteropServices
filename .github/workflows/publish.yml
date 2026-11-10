@@ -27,7 +27,7 @@ jobs:
         with:
           fetch-depth: 0  # required to resolve the tag ref
 
-      - uses: actions/setup-dotnet@v6.0.0
+      - uses: actions/setup-dotnet@v6.1.0
         with:
           global-json-file: global.json # exact SDK: the lock files record its ILLink.Tasks (see the library's .csproj)
 

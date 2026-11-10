@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
 
-      - uses: actions/setup-dotnet@v6.0.0
+      - uses: actions/setup-dotnet@v6.1.0
         with:
           global-json-file: global.json # exact SDK: the lock files record its ILLink.Tasks (see the library's .csproj)
 
@@ -47,7 +47,7 @@ jobs:
       - uses: actions/checkout@v7.0.1
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v6.0.0
+        uses: actions/setup-dotnet@v6.1.0
         with:
           global-json-file: global.json # exact SDK: the lock files record its ILLink.Tasks (see the library's .csproj)
           architecture: ${{ matrix.arch }}
@@ -80,7 +80,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
 
-      - uses: actions/setup-dotnet@v6.0.0
+      - uses: actions/setup-dotnet@v6.1.0
         with:
           global-json-file: global.json # exact SDK: the lock files record its ILLink.Tasks (see the library's .csproj)
 
