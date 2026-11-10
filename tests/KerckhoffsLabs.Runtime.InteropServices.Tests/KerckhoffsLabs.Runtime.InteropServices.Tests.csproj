@@ -44,7 +44,7 @@
     <PackageReference Include="coverlet.MTP" Version="10.1.0" />
     <!-- Property-based testing for NativeCULongDifferentialTests: generates inputs, and on a failure
          shrinks them to a minimal case and reports the seed that reproduces it. -->
-    <PackageReference Include="CsCheck" Version="5.0.0" />
+    <PackageReference Include="CsCheck" Version="5.0.1" />
     <!-- Property-based testing for NativeCULongPropertyTests: laws that hold across members (round trips,
          identities, the CULong layout) rather than agreement with an oracle, and the members reached only
          through generic math. -->
