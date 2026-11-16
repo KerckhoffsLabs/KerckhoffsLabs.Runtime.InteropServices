@@ -49,7 +49,7 @@
          identities, the CULong layout) rather than agreement with an oracle, and the members reached only
          through generic math. -->
     <PackageReference Include="FsCheck.Xunit.v3" Version="3.6.0" />
-    <PackageReference Include="xunit.v3" Version="4.0.2" />
+    <PackageReference Include="xunit.v3" Version="4.0.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="4.0.1" />
   </ItemGroup>
 
