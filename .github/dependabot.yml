@@ -24,6 +24,11 @@ updates:
       default-days: 7
       semver-patch-days: 1
     open-pull-requests-limit: 10
+    ignore:
+      # Versioned with the SDK, and runs inside the build: it moves to the next major with the pinned SDK
+      # (global.json), by hand.
+      - dependency-name: Microsoft.SourceLink.GitHub
+        update-types: ["version-update:semver-major"]
     groups:
       nuget:
         applies-to: version-updates
@@ -54,6 +59,6 @@ updates:
     commit-message:
       prefix: "ci"
 
-# Deliberately not tracked: dotnet-sdk. global.json names 10.0.100 with rollForward: latestFeature,
-# and CI installs the latest 10.0.x, so builds already use the newest SDK; raising the floor would
-# only stop older 10.0 SDKs from building the repository.
+# Deliberately not tracked: dotnet-sdk. global.json pins an exact SDK (rollForward: patch), which CI
+# installs from it, because the lock files record that SDK's ILLink.Tasks; it is raised by hand, with
+# the lock files regenerated in the same change.
